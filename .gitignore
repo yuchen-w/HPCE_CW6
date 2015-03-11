@@ -52,6 +52,7 @@ Thumbs.db
 bin/
 x64/
 Debug/
+bin_vs/
 
 #Test files#
 *.bmp
@@ -64,3 +65,5 @@ Debug/
 *.user
 *.suo
 *.filters
+*.vsp
+*.psess

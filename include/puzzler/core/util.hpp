@@ -57,7 +57,7 @@ namespace puzzler
 	public:
 		WithBinaryIO()
 		{
-			fflush((FILE*)_fileno(stdout));
+			fflush((FILE*)(_fileno(stdout)));
 			m_stdinPrev = _setmode(_fileno(stdin), _O_BINARY);
 			m_stdoutPrev = _setmode(_fileno(stdout), _O_BINARY);
 		}

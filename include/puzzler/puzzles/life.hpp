@@ -76,7 +76,7 @@ namespace puzzler
     : public PuzzleBase<LifeInput,LifeOutput>
   {
   protected:
-
+	//Todo:Optimise this
     bool update(int n, const std::vector<bool> &curr, int x, int y) const
     {
       int neighbours=0;

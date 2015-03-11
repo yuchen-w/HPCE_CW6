@@ -183,13 +183,13 @@ namespace puzzler
 			};
 			return pos - offset;
 		}
-
+		//Todo: Optimise this:
 		virtual void Execute(
 			ILog *log,
 			const StringSearchInput *pInput,
 			StringSearchOutput *pOutput
 			) const = 0;
-
+		//Todo: Optimise this:
 		void ReferenceExecute(
 			ILog *log,
 			const StringSearchInput *pInput,

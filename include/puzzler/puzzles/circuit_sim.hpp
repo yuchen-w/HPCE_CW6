@@ -8,209 +8,216 @@
 
 namespace puzzler
 {
-  class CircuitSimPuzzle;
-  class CircuitSimInput;
-  class CircuitSimOutput;
+	class CircuitSimPuzzle;
+	class CircuitSimInput;
+	class CircuitSimOutput;
 
-  class CircuitSimInput
-    : public Puzzle::Input
-  {
-  public:
+	class CircuitSimInput
+		: public Puzzle::Input
+	{
+	public:
 
-    uint32_t nandGateCount;
-    uint32_t flipFlopCount;
+		uint32_t nandGateCount;
+		uint32_t flipFlopCount;
 
-    // A list of pairs (src1,src2). If src<0 it refers to a flip-flop. If src>0 it refers to a nand output
-    std::vector<std::pair<int32_t,int32_t> > nandGateInputs;
+		// A list of pairs (src1,src2). If src<0 it refers to a flip-flop. If src>0 it refers to a nand output
+		std::vector<std::pair<int32_t, int32_t> > nandGateInputs;
 
-    // A list of srcs. If src<0 it refers to a flip-flop. If src>0 it refers to a nand output
-    std::vector<int32_t> flipFlopInputs;
-
-
-    uint32_t clockCycles;
-    std::vector<bool> inputState;
+		// A list of srcs. If src<0 it refers to a flip-flop. If src>0 it refers to a nand output
+		std::vector<int32_t> flipFlopInputs;
 
 
-    CircuitSimInput(const Puzzle *puzzle, int scale)
-      : Puzzle::Input(puzzle, scale)
-    {}
-
-    CircuitSimInput(std::string format, std::string name, PersistContext &ctxt)
-      : Puzzle::Input(format, name, ctxt)
-    {
-      PersistImpl(ctxt);
-    }
-
-    virtual void PersistImpl(PersistContext &conn) override final
-    {
-      conn.SendOrRecv(nandGateCount).SendOrRecv(flipFlopCount);
-      conn.SendOrRecv(nandGateInputs).SendOrRecv(flipFlopInputs);
-      conn.SendOrRecv(inputState);
-      conn.SendOrRecv(clockCycles);
+		uint32_t clockCycles;
+		std::vector<bool> inputState;
 
 
-      if(nandGateCount!=nandGateInputs.size())
-	throw std::runtime_error("CircuitSimInput::Persist - nandGateCount is inconsistent.");
-      if(flipFlopCount!=flipFlopInputs.size())
-	throw std::runtime_error("CircuitSimInput::Persist - flipFlopCount is inconsistent.");
-      if(inputState.size()!=flipFlopInputs.size())
-	throw std::runtime_error("CircuitSimInput::Persist - state size is inconsistent.");
-    }
+		CircuitSimInput(const Puzzle *puzzle, int scale)
+			: Puzzle::Input(puzzle, scale)
+		{}
+
+		CircuitSimInput(std::string format, std::string name, PersistContext &ctxt)
+			: Puzzle::Input(format, name, ctxt)
+		{
+			PersistImpl(ctxt);
+		}
+
+		virtual void PersistImpl(PersistContext &conn) override final
+		{
+			conn.SendOrRecv(nandGateCount).SendOrRecv(flipFlopCount);
+			conn.SendOrRecv(nandGateInputs).SendOrRecv(flipFlopInputs);
+			conn.SendOrRecv(inputState);
+			conn.SendOrRecv(clockCycles);
+
+
+			if (nandGateCount != nandGateInputs.size())
+				throw std::runtime_error("CircuitSimInput::Persist - nandGateCount is inconsistent.");
+			if (flipFlopCount != flipFlopInputs.size())
+				throw std::runtime_error("CircuitSimInput::Persist - flipFlopCount is inconsistent.");
+			if (inputState.size() != flipFlopInputs.size())
+				throw std::runtime_error("CircuitSimInput::Persist - state size is inconsistent.");
+		}
 
 
 
-  };
+	};
 
-  class CircuitSimOutput
-    : public Puzzle::Output
-  {
-  public:
-    std::vector<bool> outputState;
+	class CircuitSimOutput
+		: public Puzzle::Output
+	{
+	public:
+		std::vector<bool> outputState;
 
-    CircuitSimOutput(const Puzzle *puzzle, const Puzzle::Input *input)
-      : Puzzle::Output(puzzle, input)
-    {}
+		CircuitSimOutput(const Puzzle *puzzle, const Puzzle::Input *input)
+			: Puzzle::Output(puzzle, input)
+		{}
 
-    CircuitSimOutput(std::string format, std::string name, PersistContext &ctxt)
-      : Puzzle::Output(format, name, ctxt)
-    {
-      PersistImpl(ctxt);
-    }
+		CircuitSimOutput(std::string format, std::string name, PersistContext &ctxt)
+			: Puzzle::Output(format, name, ctxt)
+		{
+			PersistImpl(ctxt);
+		}
 
-    virtual void PersistImpl(PersistContext &conn) override
-    {
-      conn.SendOrRecv(outputState);
-    }
+		virtual void PersistImpl(PersistContext &conn) override
+		{
+			conn.SendOrRecv(outputState);
+		}
 
-    virtual bool Equals(const Output *output) const override
-    {
-      auto pOutput=As<CircuitSimOutput>(output);
-      return outputState==pOutput->outputState;
-    }
+		virtual bool Equals(const Output *output) const override
+		{
+			auto pOutput = As<CircuitSimOutput>(output);
+			return outputState == pOutput->outputState;
+		}
 
-  };
+	};
 
 
-  class CircuitSimPuzzle
-    : public PuzzleBase<CircuitSimInput,CircuitSimOutput>
-  {
-  protected:
+	class CircuitSimPuzzle
+		: public PuzzleBase<CircuitSimInput, CircuitSimOutput>
+	{
+	protected:
+		//Have a look at this:
+		bool calcSrc(unsigned src, const std::vector<bool> &state, const CircuitSimInput *input) const
+		{
+			if (src < input->flipFlopCount){
+				return state.at(src);
+			}
+			else{
+				unsigned nandSrc = src - input->flipFlopCount;
+				bool a = calcSrc(input->nandGateInputs.at(nandSrc).first, state, input);
+				bool b = calcSrc(input->nandGateInputs.at(nandSrc).second, state, input);
+				return !(a&&b);
+			}
+		}
+		//TODO:OPTIMISE
+		std::vector<bool> next(const std::vector<bool> &state, const CircuitSimInput *input) const
+		{
+			std::vector<bool> res(state.size());
+			for (unsigned i = 0; i<res.size(); i++){
+				res[i] = calcSrc(input->flipFlopInputs[i], state, input);
+			}
+			return res;
+		}
 
-    bool calcSrc(unsigned src, const std::vector<bool> &state, const CircuitSimInput *input) const
-    {
-      if(src < input->flipFlopCount){
-	return state.at(src);
-      }else{
-	unsigned nandSrc=src - input->flipFlopCount;
-	bool a=calcSrc(input->nandGateInputs.at(nandSrc).first, state, input);
-	bool b=calcSrc(input->nandGateInputs.at(nandSrc).second, state, input);
-	return !(a&&b);
-      }
-    }
+	protected:
 
-    std::vector<bool> next(const std::vector<bool> &state, const CircuitSimInput *input) const
-    {
-      std::vector<bool> res(state.size());
-      for(unsigned i=0; i<res.size(); i++){
-	res[i]=calcSrc(input->flipFlopInputs[i], state, input);
-      }
-      return res;
-    }
+		virtual void Execute(
+			ILog *log,
+			const CircuitSimInput *input,
+			CircuitSimOutput *output
+			) const = 0;
 
-  protected:
+		void ReferenceExecute(
+			ILog *log,
+			const CircuitSimInput *pInput,
+			CircuitSimOutput *pOutput
+			) const
+		{
+			log->LogVerbose("About to start running clock cycles (total = %d", pInput->clockCycles);
+			std::vector<bool> state = pInput->inputState;
+			
+			//TODO: OPTMISE
+			for (unsigned i = 0; i<pInput->clockCycles; i++){
+				log->LogVerbose("Starting iteration %d of %d\n", i, pInput->clockCycles);
 
-    virtual void Execute(
-			 ILog *log,
-			 const CircuitSimInput *input,
-			 CircuitSimOutput *output
-			 ) const =0;
+				state = next(state, pInput);
 
-    void ReferenceExecute(
-			  ILog *log,
-			  const CircuitSimInput *pInput,
-			  CircuitSimOutput *pOutput
-			  ) const
-    {
-      log->LogVerbose("About to start running clock cycles (total = %d", pInput->clockCycles);
-      std::vector<bool> state=pInput->inputState;
-      for(unsigned i=0; i<pInput->clockCycles; i++){
-	log->LogVerbose("Starting iteration %d of %d\n", i, pInput->clockCycles);
+				// The weird form of log is so that there is little overhead
+				// if logging is disabled
+				log->Log(Log_Debug, [&](std::ostream &dst) {
+					for (unsigned i = 0; i<state.size(); i++){
+						dst << state[i];
+					}
+				});
+			}
 
-	state=next(state, pInput);
+			log->LogVerbose("Finished clock cycles");
 
-	// The weird form of log is so that there is little overhead
-	// if logging is disabled
-	log->Log(Log_Debug,[&](std::ostream &dst) {
-	    for(unsigned i=0; i<state.size(); i++){
-	      dst<<state[i];
-	    }
-	  });
-      }
+			pOutput->outputState = state;
+		}
 
-      log->LogVerbose("Finished clock cycles");
+	public:
+		virtual std::string Name() const override
+		{
+			return "circuit_sim";
+		}
 
-      pOutput->outputState=state;
-    }
+		virtual std::shared_ptr<Input> CreateInput(
+			ILog *,
+			int scale
+			) const override
+		{
+			std::mt19937 rnd(time(0));  // Not the best way of seeding...
 
-  public:
-    virtual std::string Name() const override
-    { return "circuit_sim"; }
+			auto params = std::make_shared<CircuitSimInput>(this, scale);
 
-    virtual std::shared_ptr<Input> CreateInput(
-					       ILog *,
-					       int scale
-					       ) const override
-    {
-      std::mt19937 rnd(time(0));  // Not the best way of seeding...
+			params->clockCycles = scale;
+			params->flipFlopCount = scale;
+			params->nandGateCount = 10 * scale;
 
-      auto params=std::make_shared<CircuitSimInput>(this, scale);
+			params->nandGateInputs.resize(params->nandGateCount);
+			params->flipFlopInputs.resize(params->flipFlopCount);
 
-      params->clockCycles=scale;
-      params->flipFlopCount=scale;
-      params->nandGateCount=10*scale;
+			std::vector<unsigned> todo;
+			std::vector<unsigned> done;
+			
+			//TODO:OPTIMISE by preallocating the array:
+			//done needs to be of size params->flipFlopCount + todo.size()
+			for (unsigned i = 0; i<params->flipFlopCount; i++){
+				done.push_back(i);	//Pushing back indices
+			}
+			for (unsigned i = 0; i<params->nandGateCount; i++){
+				todo.push_back(i + params->flipFlopCount);
+			}
+			//POTENTIALLY?:
+			while (todo.size()>0){
+				unsigned idx = rnd() % todo.size();
+				unsigned curr = todo[idx];
+				todo.erase(todo.begin() + idx);
 
-      params->nandGateInputs.resize(params->nandGateCount);
-      params->flipFlopInputs.resize(params->flipFlopCount);
+				unsigned currNand = curr - params->flipFlopCount;
 
-      std::vector<unsigned> todo;
-      std::vector<unsigned> done;
+				unsigned src1 = done[rnd() % done.size()];
+				unsigned src2 = done[rnd() % done.size()];
 
-      for(unsigned i=0; i<params->flipFlopCount; i++){
-	done.push_back(i);
-      }
-      for(unsigned i=0; i<params->nandGateCount; i++){
-	todo.push_back(i+params->flipFlopCount);
-      }
+				params->nandGateInputs[currNand].first = src1;
+				params->nandGateInputs[currNand].second = src2;
 
-      while(todo.size()>0){
-	unsigned idx=rnd()%todo.size();
-	unsigned curr=todo[idx];
-	todo.erase(todo.begin()+idx);
+				done.push_back(curr);
+			}
 
-	unsigned currNand=curr - params->flipFlopCount;
+			for (unsigned i = 0; i<params->flipFlopCount; i++){
+				params->flipFlopInputs[i] = done[rnd() % done.size()];
+			}
 
-	unsigned src1=done[rnd()%done.size()];
-	unsigned src2=done[rnd()%done.size()];
+			params->inputState.resize(params->flipFlopCount);
+			for (unsigned i = 0; i<params->flipFlopCount; i++){
+				params->inputState[i] = 1 == (rnd() & 1);
+			}
 
-	params->nandGateInputs[currNand].first=src1;
-	params->nandGateInputs[currNand].second=src2;
+			return params;
+		}
 
-	done.push_back(curr);
-      }
-
-      for(unsigned i=0; i<params->flipFlopCount; i++){
-	params->flipFlopInputs[i]=done[rnd()%done.size()];
-      }
-
-      params->inputState.resize(params->flipFlopCount);
-      for(unsigned i=0; i<params->flipFlopCount; i++){
-	params->inputState[i] = 1 == (rnd()&1);
-      }
-
-      return params;
-    }
-
-  };
+	};
 
 };
 
