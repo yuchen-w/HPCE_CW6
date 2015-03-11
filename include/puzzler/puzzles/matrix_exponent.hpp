@@ -112,6 +112,7 @@ namespace puzzler
       return res;
     }
 
+	//TODO: Taking ages! 
     static std::vector<uint32_t> MatrixMul(unsigned n, std::vector<uint32_t> a, std::vector<uint32_t> b)
     {
       std::vector<uint32_t> res(n*n, 0);
