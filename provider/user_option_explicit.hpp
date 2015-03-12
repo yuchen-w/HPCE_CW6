@@ -46,10 +46,10 @@ public:
 	  {
 		  //TODO: parfor here
 		  for (int i = 1; i <= n; i++){
-		  vU = vU*u;
-		  vD = vD*d;
-		  state[n + i] = (std::max)(vU - input->K, 0.0);
-		  state[n - i] = (std::max)(vD - input->K, 0.0);
+			  vU = vU*u;
+			  vD = vD*d;
+			  state[n + i] = (std::max)(vU - input->K, 0.0);
+			  state[n - i] = (std::max)(vD - input->K, 0.0);
 		  }
 	  }
 	  double wU = input->wU, wD = input->wD, wM = input->wM;
@@ -90,7 +90,7 @@ public:
 					  tmp[n + i] = vCU;
 					  tmp[n - i] = vCD;
 
-					  vU = vU*u;
+					  vU = vU*u;	//Can raise this to the power
 					  vD = vD*d;
 				  }
 				  state = tmp;

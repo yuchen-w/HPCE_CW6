@@ -18,21 +18,28 @@ private:
 		return return_vector;
 	}
 
-	bool calcSrc_tbb(unsigned src, const std::vector<bool> &state, const puzzler::CircuitSimInput *input) const
+	bool calcSrc_tbb(unsigned src, const std::vector<bool> &state, const puzzler::CircuitSimInput *input, unsigned K) const
 	{
 		if (src < input->flipFlopCount){
 			return state.at(src);
 		}
 		else{
+			//TODO: Parallel across number of processors to reduce overhead
 			unsigned nandSrc = src - input->flipFlopCount;
-			tbb::task_group calcSrc_group;
-			bool a, b;
-			auto calcSrc_first = [&]() {a = calcSrc_tbb(input->nandGateInputs.at(nandSrc).first, state, input); };
-			auto calcSrc_second = [&]() {b = calcSrc_tbb(input->nandGateInputs.at(nandSrc).second, state, input); };
-			calcSrc_group.run(calcSrc_first);
-			calcSrc_group.run(calcSrc_second);
-			calcSrc_group.wait();
-			return !(a&&b);
+			
+			if (K < 100)
+				return calcSrc(input->nandGateInputs.at(nandSrc).first, state, input);
+			else
+			{
+				tbb::task_group calcSrc_group;
+				bool a, b;
+				auto calcSrc_first = [&]() {a = calcSrc_tbb(input->nandGateInputs.at(nandSrc).first, state, input, K-1); };
+				auto calcSrc_second = [&]() {b = calcSrc_tbb(input->nandGateInputs.at(nandSrc).second, state, input, K-1); };
+				calcSrc_group.run(calcSrc_first);
+				calcSrc_group.run(calcSrc_second);
+				calcSrc_group.wait();
+				return !(a&&b);
+			}
 		}
 	}
 
@@ -43,18 +50,28 @@ private:
 		res[i] = calcSrc(input->flipFlopInputs[i], state, input);
 		}*/
 
-		int K = 200;
-		typedef tbb::blocked_range<unsigned> my_range_t;
-		my_range_t range(0, res.size(), K);
-		auto f = [&](const my_range_t &chunk)
-		{
-			for (unsigned i = chunk.begin(); i != chunk.end(); i++)
+		if (res.size() > 4000){
+			int K = 1000;
+			typedef tbb::blocked_range<unsigned> my_range_t;
+			my_range_t range(0, res.size(), K);
+			auto f = [&](const my_range_t &chunk)
 			{
+				for (unsigned i = chunk.begin(); i != chunk.end(); i++)
+				{
+					res[i] = calcSrc(input->flipFlopInputs[i], state, input);
+				}
+			};
+			tbb::parallel_for(range, f, tbb::simple_partitioner());
+		}
+		else
+		{
+			for (unsigned i = 0; i < res.size(); i++)
+			{
+				unsigned K = res.size();
+				res[i] = calcSrc_tbb(input->flipFlopInputs[i], state, input, K/4);
 				res[i] = calcSrc(input->flipFlopInputs[i], state, input);
 			}
-		};
-		tbb::parallel_for(range, f, tbb::simple_partitioner());
-
+		}
 		/*unsigned size = res.size();
 		auto f = [&](unsigned i)
 		{
