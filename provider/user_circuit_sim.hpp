@@ -40,7 +40,7 @@ public:
 	std::vector<bool> state = input->inputState;
 	std::vector<bool> state_temp(state.size());
 
-	//TODO: OPTMISE
+	//TODO: OPTMISE parfor and blocked_range2d 
 	for (unsigned i = 0; i<input->clockCycles; i++){
 		log->LogVerbose("Starting iteration %d of %d\n", i, input->clockCycles);
 
