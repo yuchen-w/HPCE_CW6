@@ -43,7 +43,7 @@ private:
 		res[i] = calcSrc(input->flipFlopInputs[i], state, input);
 		}*/
 
-		int K = 10;
+		int K = 200;
 		typedef tbb::blocked_range<unsigned> my_range_t;
 		my_range_t range(0, res.size(), K);
 		auto f = [&](const my_range_t &chunk)
@@ -111,7 +111,7 @@ public:
 		bool parallel = false;
 		if (conversion == false)
 		{
-			if (parallel == true)
+			if (parallel == true)	//Parallel outer loop
 			{
 				int K = 10;
 				typedef tbb::blocked_range<unsigned> my_range_t;
@@ -137,7 +137,8 @@ public:
 				//tbb::parallel_for(0u, input->clockCycles, f);
 			}
 			else
-			{
+			{	
+				//Convert from bool to int
 				for (unsigned i = 0; i<input->clockCycles; i++){
 					log->LogVerbose("Starting iteration %d of %d\n", i, input->clockCycles);
 
