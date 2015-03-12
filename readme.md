@@ -4,7 +4,7 @@ HPCE 2014 CW6
 #Timings
 Function  | Original | TBB | OpenCL| Fn args
 ------------- | ------------- | ------------- | ------------- | -------------
-Content Cell  |  |  |  |
+life.hpp  |  |  |  |
 Content Cell  |  |  |  |
 
 
