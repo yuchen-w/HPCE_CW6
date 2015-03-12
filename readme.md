@@ -2,10 +2,10 @@ HPCE 2014 CW6
 =============
 
 #Timings
-Function  | Original | TBB | OpenCL
-------------- | ------------- | ------------- | -------------
-Content Cell  |  |  | 
-Content Cell  |  |  | 
+Function  | Original | TBB | OpenCL| Fn args
+------------- | ------------- | ------------- | ------------- | -------------
+Content Cell  |  |  |  |
+Content Cell  |  |  |  |
 
 
 
