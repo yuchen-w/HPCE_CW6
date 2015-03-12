@@ -9,52 +9,6 @@
 class LifeProvider
   : public puzzler::LifePuzzle
 {
-private:
-	bool update_tbb(int n, const std::vector<bool> &curr, int x, int y) const
-	{
-		int neighbours = 0;
-		unsigned K = 10;
-
-		auto f = [&](const tbb::blocked_range2d<unsigned> &chunk) {
-
-			for (int dx = chunk.rows().begin(); dx != chunk.rows().end(); dx++){
-				for (int dy = chunk.rows().begin(); dy != chunk.rows().end(); dy++){
-					int ox = (n + x + dx) % n; // handle wrap-around
-					int oy = (n + y + dy) % n;
-
-					if (curr.at(oy*n + ox) && !(dx == 0 && dy == 0))
-						neighbours++;
-				}
-			}
-
-
-		};
-		
-		tbb::parallel_for(tbb::blocked_range2d<unsigned>(-1, +2, K, -1, +2, K), f, tbb::simple_partitioner());
-
-		if (curr[n*y + x]){
-			// alive
-			if (neighbours<2){
-				return false;
-			}
-			else if (neighbours>3){
-				return false;
-			}
-			else{
-				return true;
-			}
-		}
-		else{
-			// dead
-			if (neighbours == 3){
-				return true;
-			}
-			else{
-				return false;
-			}
-		}
-	}
-
 public:
   LifeProvider()
   {}
@@ -64,7 +18,8 @@ public:
 		       const puzzler::LifeInput *input,
 		       puzzler::LifeOutput *output
 		       ) const override {
-    //ReferenceExecute(log, input, output);
+    /*ReferenceExecute(log, input, output);*/
+
 	  log->LogVerbose("About to start running iterations (total = %d)", input->steps);
 
 	  unsigned n = input->n;
@@ -84,12 +39,18 @@ public:
 		  log->LogVerbose("Starting iteration %d of %d\n", i, input->steps);
 
 		  std::vector<bool> next(n*n);
+		
+		  //Parallelised next[]=
+		  unsigned K = 10;
 
-		  for (unsigned x = 0; x<n; x++){
-			  for (unsigned y = 0; y<n; y++){
-				  next[y*n + x] = update_tbb(n, state, x, y);
+		  auto f = [&](const tbb::blocked_range2d<unsigned> &chunk) {
+			  for (unsigned x = chunk.rows().begin(); x != chunk.rows().end(); x++){
+				  for (unsigned y = chunk.cols().begin(); y != chunk.cols().end(); y++){
+					  next[y*n + x] = update(n, state, x, y);
+				  }
 			  }
-		  }
+		  };
+		  tbb::parallel_for(tbb::blocked_range2d<unsigned>(0, n, K, 0, n, K), f, tbb::simple_partitioner());
 
 		  state = next;
 
@@ -109,6 +70,7 @@ public:
 	  log->LogVerbose("Finished steps");
 
 	  output->state = state;
+
 
   }
 
