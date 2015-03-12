@@ -1,17 +1,18 @@
 HPCE 2014 CW6
 =============
 
-#Timings
-Function  | Original | TBB | OpenCL
-------------- | ------------- | ------------- | -------------
-Content Cell  |  |  | 
-Content Cell  |  |  | 
+Timings
+-------
+Function  | Original | TBB | OpenCL| Fn args
+------------- | ------------- | ------------- | ------------- | -------------
+life.hpp  |  |  |  |
+Content Cell  |  |  |  |
 
 
 
 
 
-
+Original Specification
 =====================
 - Issued: Sun 8th March
 - Due: Sun 22nd March, 23:59
