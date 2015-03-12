@@ -23,31 +23,35 @@ public:
 	  std::vector<double> state(n * 2 + 1);
 	  double vU = input->S0, vD = input->S0;
 	  state[input->n] = (std::max)(vU - input->K, 0.0);
-	  
-	  //TODO: parfor here
-	  /*for (int i = 1; i <= n; i++){
+
+	  unsigned K = 1000;
+	  //parfor:
+	  if (n > 4000){
+		  typedef tbb::blocked_range<unsigned> my_range_t;
+		  
+		  my_range_t range(1, n, K);
+		  auto f = [&](const my_range_t &chunk)
+		  {
+			  for (unsigned i = chunk.begin(); i != chunk.end(); i++)
+			  {
+				  vU = vU*u;
+				  vD = vD*d;
+				  state[n + i] = (std::max)(vU - input->K, 0.0);
+				  state[n - i] = (std::max)(vD - input->K, 0.0);
+			  }
+		  };
+		  tbb::parallel_for(range, f, tbb::simple_partitioner());
+	  }
+	  else
+	  {
+		  //TODO: parfor here
+		  for (int i = 1; i <= n; i++){
 		  vU = vU*u;
 		  vD = vD*d;
 		  state[n + i] = (std::max)(vU - input->K, 0.0);
 		  state[n - i] = (std::max)(vD - input->K, 0.0);
-	  }*/
-
-	  //parfor:
-	  typedef tbb::blocked_range<unsigned> my_range_t;
-	  unsigned K = 1000;
-	  my_range_t range(1, n, K);
-	  auto f = [&](const my_range_t &chunk)
-	  {
-		  for (unsigned i = chunk.begin(); i != chunk.end(); i++)
-		  {
-			  vU = vU*u;
-			  vD = vD*d;
-			  state[n + i] = (std::max)(vU - input->K, 0.0);
-			  state[n - i] = (std::max)(vD - input->K, 0.0);
 		  }
-	  };
-	  tbb::parallel_for(range, f, tbb::simple_partitioner());
-
+	  }
 	  double wU = input->wU, wD = input->wD, wM = input->wM;
 
 	  //TODO:double parfor here
