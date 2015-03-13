@@ -34,8 +34,8 @@ public:
 		  {
 			  for (unsigned i = chunk.begin(); i != chunk.end(); i++)
 			  {
-				  double vU = input->S0*std::pow(u, (i));	//Can raise this to the power
-				  double vD = input->S0*std::pow(d, (i));
+				  vU = vU*u;
+				  vD = vD*d;
 				  state[n + i] = (std::max)(vU - input->K, 0.0);
 				  state[n - i] = (std::max)(vD - input->K, 0.0);
 			  }
@@ -150,22 +150,22 @@ public:
 		  bool parfor_inner = true;
 		  if (parfor_inner == true)
 		  {
-			  typedef tbb::blocked_range<unsigned> my_range_t;
-			  my_range_t range2(0, n, K);
-			  auto f2 = [&](const my_range_t &chunk2){
-				  for (unsigned i = chunk2.begin(); i != chunk2.end(); i++){
-					  double vU = input->S0*std::pow(u, (i));	//Can raise this to the power
-					  double vD = input->S0*std::pow(d, (i));
-					  double vCU = wU*state[n + i + 1] + wM*state[n + i] + wD*state[n + i - 1];	//state depends on the previous iteration (of outer loop)'s result
-					  double vCD = wU*state[n - i + 1] + wM*state[n - i] + wD*state[n - i - 1];
-					  vCU = (std::max)(vCU, vU - input->K);	//vU depends on the previous iteration's result for vU
-					  vCD = (std::max)(vCD, vD - input->K);
-					  tmp[n + i] = vCU;
-					  tmp[n - i] = vCD;
-				  }
-			  };
 			  for (int t = 0; t < n; t++){
 				  std::vector<double> tmp(state.size());	//std::vector<double> tmp = state;
+				  typedef tbb::blocked_range<unsigned> my_range_t;
+				  my_range_t range2(0, n, K);
+				  auto f2 = [&](const my_range_t &chunk2){	//look at moving this out of the loop
+					  for (unsigned i = chunk2.begin(); i != chunk2.end(); i++){
+						  double vU = input->S0*std::pow(u, (i));	//This is expensive, do it outside of the i loop
+						  double vD = input->S0*std::pow(d, (i));
+						  double vCU = wU*state[n + i + 1] + wM*state[n + i] + wD*state[n + i - 1];	//state depends on the previous iteration (of outer loop)'s result
+						  double vCD = wU*state[n - i + 1] + wM*state[n - i] + wD*state[n - i - 1];
+						  vCU = (std::max)(vCU, vU - input->K);	//vU depends on the previous iteration's result for vU
+						  vCD = (std::max)(vCD, vD - input->K);
+						  tmp[n + i] = vCU;
+						  tmp[n - i] = vCD;
+					  }
+				  };
 				  tbb::parallel_for(range2, f2, tbb::simple_partitioner());
 				  std::swap(state, tmp);	//state = tmp;
 			  }
