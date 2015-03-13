@@ -90,8 +90,8 @@ public:
 					  tmp[n + i] = vCU;
 					  tmp[n - i] = vCD;
 
-					  vU = vU*u;	//Can raise this to the power
-					  vD = vD*d;
+					  vU = input->S0*std::pow(u, (i + 1));	//Can raise this to the power
+					  vD = input->S0*std::pow(d, (i + 1));
 				  }
 				  state = tmp;
 			  }
@@ -102,22 +102,24 @@ public:
 	  {
 		  std::vector<double> tmp(state.size());	//std::vector<double> tmp = state;
 
-		  //OpenCL this:
-		  for (int t = 0; t < n; t++){
-			  vU = input->S0, vD = input->S0;
-			  for (int i = 0; i < n; i++){
-				  double vCU = wU*state[n + i + 1] + wM*state[n + i] + wD*state[n + i - 1];	//state depends on the previous iteration (of outer loop)'s result
-				  double vCD = wU*state[n - i + 1] + wM*state[n - i] + wD*state[n - i - 1];
-				  vCU = (std::max)(vCU, vU - input->K);	//vU depends on the previous iteration's result for vU
-				  vCD = (std::max)(vCD, vD - input->K);
-				  tmp[n + i] = vCU;
-				  tmp[n - i] = vCD;
+		  //Original Code:
+		  //for (int t = 0; t < n; t++){
+		  // vU = input->S0, vD = input->S0;
+		  // for (int i = 0; i < n; i++){
+		  //  vU = input->S0*std::pow(u, (i));	//Can raise this to the power
+		  //  vD = input->S0*std::pow(d, (i));
+		  //  double vCU = wU*state[n + i + 1] + wM*state[n + i] + wD*state[n + i - 1];	//state depends on the previous iteration (of outer loop)'s result
+		  //  double vCD = wU*state[n - i + 1] + wM*state[n - i] + wD*state[n - i - 1];
+		  //  vCU = (std::max)(vCU, vU - input->K);	//vU depends on the previous iteration's result for vU
+		  //  vCD = (std::max)(vCD, vD - input->K);
+		  //  tmp[n + i] = vCU;
+		  //  tmp[n - i] = vCD;
 
-				  vU = vU*u;
-				  vD = vD*d;
-			  }
-			  std::swap(state, tmp);	//state = tmp;
-		  }
+		  //  //vU = vU*u;	//Can raise this to the power
+		  //  //vD = vD*d;
+		  // }
+		  // std::swap(state, tmp);	//state = tmp;
+		  //}
 
 		  //****parfor outer loop********
 		  //my_range_t range2(0, n, K);
@@ -145,28 +147,56 @@ public:
 		  //tbb::parallel_for(range2, f2, tbb::simple_partitioner());
 
 		  //*********parfor inner loop**************
-
-		  //for (int t = 0; t < n; t++){
-			 // std::vector<double> tmp(state.size());	//std::vector<double> tmp = state;
-
-			 // vU = input->S0, vD = input->S0;
-			 // my_range_t range2(0, n, K);
-			 // auto f2 = [&](const my_range_t &chunk2){
-				//  for (int i = chunk2.begin(); i != chunk2.end(); i++){
-				//	  double vCU = wU*state[n + i + 1] + wM*state[n + i] + wD*state[n + i - 1];
-				//	  double vCD = wU*state[n - i + 1] + wM*state[n - i] + wD*state[n - i - 1];
-				//	  vCU = (std::max)(vCU, vU - input->K);
-				//	  vCD = (std::max)(vCD, vD - input->K);
-				//	  tmp[n + i] = vCU;
-				//	  tmp[n - i] = vCD;
-
-				//	  vU = vU*u;
-				//	  vD = vD*d;
-				//  }
-			 // };
-			 // tbb::parallel_for(range2, f2, tbb::simple_partitioner());
-			 // std::swap(state, tmp);	//state = tmp;
-		  //}
+		  bool parfor_inner = true;
+		  if (parfor_inner == true)
+		  {
+			  for (int t = 0; t < n; t++){
+				  std::vector<double> tmp(state.size());	//std::vector<double> tmp = state;
+				  typedef tbb::blocked_range<unsigned> my_range_t;
+				  my_range_t range2(0, n, K);
+				  auto f2 = [&](const my_range_t &chunk2){
+					  for (unsigned i = chunk2.begin(); i != chunk2.end(); i++){
+						  double vU = input->S0*std::pow(u, (i));	//Can raise this to the power
+						  double vD = input->S0*std::pow(d, (i));
+						  double vCU = wU*state[n + i + 1] + wM*state[n + i] + wD*state[n + i - 1];	//state depends on the previous iteration (of outer loop)'s result
+						  double vCD = wU*state[n - i + 1] + wM*state[n - i] + wD*state[n - i - 1];
+						  vCU = (std::max)(vCU, vU - input->K);	//vU depends on the previous iteration's result for vU
+						  vCD = (std::max)(vCD, vD - input->K);
+						  tmp[n + i] = vCU;
+						  tmp[n - i] = vCD;
+					  }
+				  };
+				  tbb::parallel_for(range2, f2, tbb::simple_partitioner());
+				  std::swap(state, tmp);	//state = tmp;
+			  }
+		  }
+		  else
+		  {
+			  //Test code:
+			  for (int t = 0; t < n; t++){
+				  for (int i = 0; i < n/2; i++){
+					  vU = input->S0*std::pow(u, (i));	//Can raise this to the power
+					  vD = input->S0*std::pow(d, (i));
+					  double vCU = wU*state[n + i + 1] + wM*state[n + i] + wD*state[n + i - 1];	//state depends on the previous iteration (of outer loop)'s result
+					  double vCD = wU*state[n - i + 1] + wM*state[n - i] + wD*state[n - i - 1];
+					  vCU = (std::max)(vCU, vU - input->K);	//vU depends on the previous iteration's result for vU
+					  vCD = (std::max)(vCD, vD - input->K);
+					  tmp[n + i] = vCU;
+					  tmp[n - i] = vCD;
+				  }
+				  for (int i = n/2; i < n; i++){
+					  vU = input->S0*std::pow(u, (i));	//Can raise this to the power
+					  vD = input->S0*std::pow(d, (i));
+					  double vCU = wU*state[n + i + 1] + wM*state[n + i] + wD*state[n + i - 1];	//state depends on the previous iteration (of outer loop)'s result
+					  double vCD = wU*state[n - i + 1] + wM*state[n - i] + wD*state[n - i - 1];
+					  vCU = (std::max)(vCU, vU - input->K);	//vU depends on the previous iteration's result for vU
+					  vCD = (std::max)(vCD, vD - input->K);
+					  tmp[n + i] = vCU;
+					  tmp[n - i] = vCD;
+				  }
+				  std::swap(state, tmp);	//state = tmp;
+			  }
+		  }
 	  }
 	  output->steps = n;
 	  output->value = state[n];
