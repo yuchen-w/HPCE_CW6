@@ -155,11 +155,24 @@ public:
 			}
 			else
 			{	
-				//Convert from bool to int
-				for (unsigned i = 0; i<input->clockCycles; i++){
+				
+				for (unsigned i = 0; i<input->clockCycles/2; i++){
 					log->LogVerbose("Starting iteration %d of %d\n", i, input->clockCycles);
 
-					state = next_tbb(state, input);
+					state = next(state, input);
+
+					// The weird form of log is so that there is little overhead
+					// if logging is disabled
+					log->Log(puzzler::Log_Debug, [&](std::ostream &dst) {
+						for (unsigned i = 0; i<state.size(); i++){
+							dst << state[i];
+						}
+					});
+				}
+				for (unsigned i = input->clockCycles/2; i<input->clockCycles; i++){
+					log->LogVerbose("Starting iteration %d of %d\n", i, input->clockCycles);
+
+					state = next(state, input);
 
 					// The weird form of log is so that there is little overhead
 					// if logging is disabled
@@ -172,7 +185,7 @@ public:
 			}
 		}
 		else
-		{
+		{	//Convert from bool to int
 			std::vector<int> state_int;
 			for (bool value : state) {
 				state_int.push_back(value ? 1 : 0);
