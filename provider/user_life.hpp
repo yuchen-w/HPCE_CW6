@@ -9,6 +9,110 @@
 class LifeProvider
   : public puzzler::LifePuzzle
 {
+
+private:
+	bool update_unroll(int n, const std::vector<bool> &curr, int x, int y) const
+	{
+		int neighbours = 0;
+		int ox;
+		int oy;
+		//dx = -1, dy = -1
+
+		ox = (n + x  -1) % n; // handle wrap-around
+		oy = (n + y  -1) % n;
+
+		if (curr.at(oy*n + ox)) 
+			neighbours++;
+
+		//dx = -1, dy = 0
+		ox = (n + x -1) % n; // handle wrap-around
+		oy = (n + y) % n;
+
+		if (curr.at(oy*n + ox)) 
+			neighbours++;
+
+		//dx = -1, dy = 1
+		ox = (n + x -1) % n; // handle wrap-around
+		oy = (n + y + 1) % n;
+
+		if (curr.at(oy*n + ox)) 
+			neighbours++;
+
+		//dx = 0, dy = -1
+		ox = (n + x) % n; // handle wrap-around
+		oy = (n + y - 1) % n;
+
+		if (curr.at(oy*n + ox))
+			neighbours++;
+
+		//dx = 0, dy = 0
+		ox = (n + x) % n; // handle wrap-around
+		oy = (n + y) % n;
+
+		//no if loop because !(dx == 0 && dy == 0) = 0
+
+		//dx = 0, dy = 1
+		ox = (n + x) % n; // handle wrap-around
+		oy = (n + y + 1) % n;
+
+		if (curr.at(oy*n + ox))
+			neighbours++;
+
+		//dx = 1, dy = -1
+
+		ox = (n + x + 1) % n; // handle wrap-around
+		oy = (n + y - 1) % n;
+
+		if (curr.at(oy*n + ox))
+			neighbours++;
+
+		//dx = 1, dy = 0
+		ox = (n + x + 1) % n; // handle wrap-around
+		oy = (n + y) % n;
+
+		if (curr.at(oy*n + ox))
+			neighbours++;
+
+		//dx = 1, dy = 1
+		ox = (n + x + 1) % n; // handle wrap-around
+		oy = (n + y + 1) % n;
+
+		if (curr.at(oy*n + ox))
+			neighbours++;
+
+
+		//for (int dx = -1; dx <= +1; dx++){
+		//	for (int dy = -1; dy <= +1; dy++){
+		//		int ox = (n + x + dx) % n; // handle wrap-around
+		//		int oy = (n + y + dy) % n;
+
+		//		if (curr.at(oy*n + ox) && !(dx == 0 && dy == 0))
+		//			neighbours++;
+		//	}
+		//}
+
+		if (curr[n*y + x]){
+			// alive
+			if (neighbours<2){
+				return false;
+			}
+			else if (neighbours>3){
+				return false;
+			}
+			else{
+				return true;
+			}
+		}
+		else{
+			// dead
+			if (neighbours == 3){
+				return true;
+			}
+			else{
+				return false;
+			}
+		}
+	}
 public:
   LifeProvider()
   {}
@@ -46,7 +150,7 @@ public:
 		  auto f = [&](const tbb::blocked_range2d<unsigned> &chunk) {
 			  for (unsigned x = chunk.rows().begin(); x != chunk.rows().end(); x++){
 				  for (unsigned y = chunk.cols().begin(); y != chunk.cols().end(); y++){
-					  next[y*n + x] = update(n, state, x, y);
+					  next[y*n + x] = update_unroll(n, state, x, y);
 				  }
 			  }
 		  };
