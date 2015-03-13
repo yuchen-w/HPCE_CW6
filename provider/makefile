@@ -15,7 +15,7 @@ tbbLDFLAGS += -L $(TBB_LIB_DIR)
 XLINKER += -Xlinker -rpath -Xlinker $(TBB_LIB_DIR)
 
 puzzles.o : *.hpp
-$(CXX) $(tbbCPPFLAGS) $^ -o $@ $(XLINKER) $(tbbLDFLAGS) $(tbbLDLIBS)
+#$(CXX) $(tbbCPPFLAGS) $^ -o $@ $(XLINKER) $(tbbLDFLAGS) $(tbbLDLIBS)
 
 ../lib/libpuzzler.a : puzzles.o
 	-mkdir -p ../lib
