@@ -1,5 +1,30 @@
 HPCE 2014 CW6
 =============
+Approach to improve performance
+-------------------------------
+Code was ran with the Visual Studio's Performance Profiler over a few minutes to identify key functions which were taking the most exectuion time:
+![image](https://cloud.githubusercontent.com/assets/3355737/6650373/a8bd3e5e-ca06-11e4-9048-fa2f345940ef.png)
+
+TBB was used to optimise these functions in the first instance.
+
+Some functions that looked like they could be improved with OpenCL were implemented in OpenCL.
+
+Testing Methodology
+-------------------
+
+Work division
+-------------
+
+TBB:
+
+life optimisations: Michael
+matrix exponent optimisations: Michael
+
+circuit_sim optimisations: Yuchen
+option_explicit optimisations: Yuchen
+
+OpenCL
+life optimisations: Michael
 
 Timings
 -------
