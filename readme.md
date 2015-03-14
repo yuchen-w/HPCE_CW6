@@ -2,7 +2,7 @@ HPCE 2014 CW6
 =============
 Approach to improve performance
 -------------------------------
-Code was ran with the Visual Studio's Performance Profiler over a few minute to identify key functions to identify:
+Code was ran with the Visual Studio's Performance Profiler over a few minutes to identify key functions to identify:
 ![image](https://cloud.githubusercontent.com/assets/3355737/6650373/a8bd3e5e-ca06-11e4-9048-fa2f345940ef.png)
 
 TBB was used to optimise all functions in the first instance.
