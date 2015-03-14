@@ -16,9 +16,11 @@ Work division
 -------------
 
 TBB:
-circuit_sim optimisations: Yuchen
+
 life optimisations: Michael
 matrix exponent optimisations: Michael
+
+circuit_sim optimisations: Yuchen
 option_explicit optimisations: Yuchen
 
 OpenCL
