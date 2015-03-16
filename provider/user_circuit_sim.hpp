@@ -1,3 +1,5 @@
+//Notes: consider coverting from vector<bool> to vector<char>
+
 #ifndef user_circuit_sim_hpp
 #define user_circuit_sim_hpp
 
