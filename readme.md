@@ -17,14 +17,14 @@ Work division
 
 TBB:
 
-life optimisations: Michael
-matrix exponent optimisations: Michael
+- life optimisations: Michael
+- matrix exponent optimisations: Michael
 
-circuit_sim optimisations: Yuchen
-option_explicit optimisations: Yuchen
+- circuit_sim optimisations: Yuchen
+- option_explicit optimisations: Yuchen
 
-OpenCL
-life optimisations: Michael
+OpenCL:
+- life optimisations: Michael
 
 Timings
 -------
