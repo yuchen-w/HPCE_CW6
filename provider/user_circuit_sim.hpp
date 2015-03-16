@@ -6,7 +6,7 @@
 #include "puzzler/puzzles/circuit_sim.hpp"
 #include "tbb/task_group.h"
 #include "tbb/parallel_for.h"
-//#include "tbb/blocked_range2d.h"
+#include "tbb/blocked_range2d.h"
 //#include "tbb/concurrent_vector.h"
 
 class CircuitSimProvider
