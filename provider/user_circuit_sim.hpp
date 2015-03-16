@@ -51,31 +51,27 @@ private:
 		}*/
 
 		//if (res.size() < 1000){
-		//	/*int K = 1000;
-		//	typedef tbb::blocked_range<unsigned> my_range_t;
-		//	my_range_t range(0, res.size(), K);
-		//	auto f = [&](const my_range_t &chunk)
-		//	{
-		//		for (unsigned i = chunk.begin(); i != chunk.end(); i++)
-		//		{
-		//			res[i] = calcSrc(input->flipFlopInputs[i], state, input);
-		//		}
-		//	};
-		//	tbb::parallel_for(range, f, tbb::simple_partitioner());*/
-		//	for (unsigned i = 0; i<res.size(); i++){
-		//		res[i] = calcSrc(input->flipFlopInputs[i], state, input);
-		//	}
+			int K = 1000;
+			typedef tbb::blocked_range<unsigned> my_range_t;
+			my_range_t range(0, res.size(), K);
+			auto f = [&](const my_range_t &chunk)
+			{
+				for (unsigned i = chunk.begin(); i != chunk.end(); i++)
+				{
+					res[i] = calcSrc_tbb(input->flipFlopInputs[i], state, input);
+				}
+			};
+			tbb::parallel_for(range, f, tbb::simple_partitioner());
 		//}
 		//else
 		//{
-			for (unsigned i = 0; i < res.size(); i++)
-			{
-				unsigned K = res.size();
-				res[i] = calcSrc_tbb(input->flipFlopInputs[i], state, input, K/4);
-				//res[i] = calcSrc(input->flipFlopInputs[i], state, input);
-			}
+		//	for (unsigned i = 0; i < res.size(); i++)
+		//	{
+		//		unsigned K = res.size();
+		//		res[i] = calcSrc_tbb(input->flipFlopInputs[i], state, input, K/4);
+		//		//res[i] = calcSrc(input->flipFlopInputs[i], state, input);
+		//	}
 		//}
-
 		/*unsigned size = res.size();
 		auto f = [&](unsigned i)
 		{
@@ -160,81 +156,81 @@ public:
 			else
 			{	
 				
-				for (unsigned i = 0; i<input->clockCycles/2; i++){
-					log->LogVerbose("Starting iteration %d of %d\n", i, input->clockCycles);
+				//for (unsigned i = 0; i<input->clockCycles/2; i++){
+				//	log->LogVerbose("Starting iteration %d of %d\n", i, input->clockCycles);
 
-					state = next(state, input);
+				//	state = next(state, input);
 
-					// The weird form of log is so that there is little overhead
-					// if logging is disabled
-					log->Log(puzzler::Log_Debug, [&](std::ostream &dst) {
-						for (unsigned i = 0; i<state.size(); i++){
-							dst << state[i];
-						}
-					});
-				}
-				for (unsigned i = input->clockCycles/2; i<input->clockCycles; i++){
-					log->LogVerbose("Starting iteration %d of %d\n", i, input->clockCycles);
+				//	// The weird form of log is so that there is little overhead
+				//	// if logging is disabled
+				//	log->Log(puzzler::Log_Debug, [&](std::ostream &dst) {
+				//		for (unsigned i = 0; i<state.size(); i++){
+				//			dst << state[i];
+				//		}
+				//	});
+				//}
+				//for (unsigned i = input->clockCycles/2; i<input->clockCycles; i++){
+				//	log->LogVerbose("Starting iteration %d of %d\n", i, input->clockCycles);
 
-					state = next(state, input);
+				//	state = next(state, input);
 
-					// The weird form of log is so that there is little overhead
-					// if logging is disabled
-					log->Log(puzzler::Log_Debug, [&](std::ostream &dst) {
-						for (unsigned i = 0; i<state.size(); i++){
-							dst << state[i];
-						}
-					});
-				}
+				//	// The weird form of log is so that there is little overhead
+				//	// if logging is disabled
+				//	log->Log(puzzler::Log_Debug, [&](std::ostream &dst) {
+				//		for (unsigned i = 0; i<state.size(); i++){
+				//			dst << state[i];
+				//		}
+				//	});
+				//}
 			}
 		}
 		else
-		{	//Convert from bool to int
-			std::vector<int> state_int;
-			for (bool value : state) {
-				state_int.push_back(value ? 1 : 0);
-			}
-			//conversion taken from reddit because of issues in VS with vector<bool>
+		//{	//Convert from bool to int
+		//	std::vector<int> state_int;
+		//	for (bool value : state) {
+		//		state_int.push_back(value ? 1 : 0);
+		//	}
+		//	//conversion taken from reddit because of issues in VS with vector<bool>
 
-			//int K = 10;
-			//typedef tbb::blocked_range<unsigned> my_range_t;
-			//my_range_t range(0, input->clockCycles, K);
-			//auto f = [&](const my_range_t &chunk)
-			//{
-			//	for (unsigned i = chunk.begin(); i != chunk.end(); i++)
-			//	{
-			//		log->LogVerbose("Starting iteration %d of %d\n", i, input->clockCycles);
+		//	//int K = 10;
+		//	//typedef tbb::blocked_range<unsigned> my_range_t;
+		//	//my_range_t range(0, input->clockCycles, K);
+		//	//auto f = [&](const my_range_t &chunk)
+		//	//{
+		//	//	for (unsigned i = chunk.begin(); i != chunk.end(); i++)
+		//	//	{
+		//	//		log->LogVerbose("Starting iteration %d of %d\n", i, input->clockCycles);
 
-			//		state_int = next_int(state_int, input);
+		//	//		state_int = next_int(state_int, input);
 
-			//		// The weird form of log is so that there is little overhead
-			//		// if logging is disabled
-			//		log->Log(puzzler::Log_Debug, [&](std::ostream &dst) {
-			//			for (unsigned j = 0; i < state.size(); j++){
-			//				dst << state[j];
-			//			}
-			//		});
-			//	}
-			//};
-			//tbb::parallel_for(range, f, tbb::simple_partitioner());
+		//	//		// The weird form of log is so that there is little overhead
+		//	//		// if logging is disabled
+		//	//		log->Log(puzzler::Log_Debug, [&](std::ostream &dst) {
+		//	//			for (unsigned j = 0; i < state.size(); j++){
+		//	//				dst << state[j];
+		//	//			}
+		//	//		});
+		//	//	}
+		//	//};
+		//	//tbb::parallel_for(range, f, tbb::simple_partitioner());
 
-			for (unsigned i = 0; i<input->clockCycles; i++){
-				log->LogVerbose("Starting iteration %d of %d\n", i, input->clockCycles);
+		//	for (unsigned i = 0; i<input->clockCycles; i++){
+		//		log->LogVerbose("Starting iteration %d of %d\n", i, input->clockCycles);
 
-				state_int = next_int(state_int, input);
+		//		state_int = next_int(state_int, input);
 
-				// The weird form of log is so that there is little overhead
-				// if logging is disabled
-				log->Log(puzzler::Log_Debug, [&](std::ostream &dst) {
-					for (unsigned i = 0; i<state_int.size(); i++){
-						dst << state_int[i];
-					}
-				});
-			}
+		//		// The weird form of log is so that there is little overhead
+		//		// if logging is disabled
+		//		log->Log(puzzler::Log_Debug, [&](std::ostream &dst) {
+		//			for (unsigned i = 0; i<state_int.size(); i++){
+		//				dst << state_int[i];
+		//			}
+		//		});
+		//	}
 
-			for (int i : state_int) {
-				state.at(i)=!!state_int.at(i);
-			}
+		//	for (int i : state_int) {
+		//		state.at(i)=!!state_int.at(i);
+		//	}
 		}
 		log->LogVerbose("Finished clock cycles");
 
