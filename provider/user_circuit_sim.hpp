@@ -58,7 +58,7 @@ private:
 			{
 				for (unsigned i = chunk.begin(); i != chunk.end(); i++)
 				{
-					res[i] = calcSrc_tbb(input->flipFlopInputs[i], state, input);
+					res[i] = calcSrc_tbb(input->flipFlopInputs[i], state, input, res.size());
 				}
 			};
 			tbb::parallel_for(range, f, tbb::simple_partitioner());
@@ -153,8 +153,8 @@ public:
 				tbb::parallel_for(range, f, tbb::simple_partitioner());
 				//tbb::parallel_for(0u, input->clockCycles, f);
 			}
-			else
-			{	
+			//else
+			//{	
 				
 				//for (unsigned i = 0; i<input->clockCycles/2; i++){
 				//	log->LogVerbose("Starting iteration %d of %d\n", i, input->clockCycles);
@@ -182,9 +182,9 @@ public:
 				//		}
 				//	});
 				//}
-			}
+			//}
 		}
-		else
+		//else
 		//{	//Convert from bool to int
 		//	std::vector<int> state_int;
 		//	for (bool value : state) {
@@ -231,7 +231,7 @@ public:
 		//	for (int i : state_int) {
 		//		state.at(i)=!!state_int.at(i);
 		//	}
-		}
+		//}
 		log->LogVerbose("Finished clock cycles");
 
 		output->outputState = state;
