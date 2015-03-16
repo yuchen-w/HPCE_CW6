@@ -50,31 +50,32 @@ private:
 		res[i] = calcSrc(input->flipFlopInputs[i], state, input);
 		}*/
 
-		if (res.size() < 1000){
-			/*int K = 1000;
-			typedef tbb::blocked_range<unsigned> my_range_t;
-			my_range_t range(0, res.size(), K);
-			auto f = [&](const my_range_t &chunk)
-			{
-				for (unsigned i = chunk.begin(); i != chunk.end(); i++)
-				{
-					res[i] = calcSrc(input->flipFlopInputs[i], state, input);
-				}
-			};
-			tbb::parallel_for(range, f, tbb::simple_partitioner());*/
-			for (unsigned i = 0; i<res.size(); i++){
-				res[i] = calcSrc(input->flipFlopInputs[i], state, input);
-			}
-		}
-		else
-		{
+		//if (res.size() < 1000){
+		//	/*int K = 1000;
+		//	typedef tbb::blocked_range<unsigned> my_range_t;
+		//	my_range_t range(0, res.size(), K);
+		//	auto f = [&](const my_range_t &chunk)
+		//	{
+		//		for (unsigned i = chunk.begin(); i != chunk.end(); i++)
+		//		{
+		//			res[i] = calcSrc(input->flipFlopInputs[i], state, input);
+		//		}
+		//	};
+		//	tbb::parallel_for(range, f, tbb::simple_partitioner());*/
+		//	for (unsigned i = 0; i<res.size(); i++){
+		//		res[i] = calcSrc(input->flipFlopInputs[i], state, input);
+		//	}
+		//}
+		//else
+		//{
 			for (unsigned i = 0; i < res.size(); i++)
 			{
 				unsigned K = res.size();
 				res[i] = calcSrc_tbb(input->flipFlopInputs[i], state, input, K/4);
 				//res[i] = calcSrc(input->flipFlopInputs[i], state, input);
 			}
-		}
+		//}
+
 		/*unsigned size = res.size();
 		auto f = [&](unsigned i)
 		{
