@@ -31,6 +31,7 @@ Timings
 Function  | Original | TBB | OpenCL| Fn args
 ------------- | ------------- | ------------- | ------------- | -------------
 life.hpp  |  |  |  |
+circuit_sim| | | |![image](https://cloud.githubusercontent.com/assets/3355737/6678011/39207a2e-cc2d-11e4-8c4d-9296de56c130.png)
 Content Cell  |  |  |  |
 
 
