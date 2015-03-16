@@ -125,12 +125,12 @@ public:
 		std::vector<bool> state = input->inputState;
 
 		bool conversion = false;
-		bool parallel = false;
+		bool parallel = true;
 		if (conversion == false)
 		{
 			if (parallel == true)	//Parallel outer loop
 			{
-				int K = 10;
+				int K = 100;
 				typedef tbb::blocked_range<unsigned> my_range_t;
 				my_range_t range(0, input->clockCycles, K);
 				auto f = [&](const my_range_t &chunk)
