@@ -50,7 +50,7 @@ private:
 		res[i] = calcSrc(input->flipFlopInputs[i], state, input);
 		}*/
 
-		if (res.size() > 4000){
+		if (res.size() > 1000){
 			int K = 1000;
 			typedef tbb::blocked_range<unsigned> my_range_t;
 			my_range_t range(0, res.size(), K);
@@ -130,7 +130,7 @@ public:
 		{
 			if (parallel == true)	//Parallel outer loop
 			{
-				int K = 100;
+				int K = 1000;
 				typedef tbb::blocked_range<unsigned> my_range_t;
 				my_range_t range(0, input->clockCycles, K);
 				auto f = [&](const my_range_t &chunk)
@@ -139,7 +139,7 @@ public:
 					{
 						log->LogVerbose("Starting iteration %d of %d\n", i, input->clockCycles);
 
-						state = next(state, input);
+						state = next_tbb(state, input);
 
 						// The weird form of log is so that there is little overhead
 						// if logging is disabled
