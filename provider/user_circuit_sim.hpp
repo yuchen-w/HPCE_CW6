@@ -125,7 +125,7 @@ public:
 		std::vector<bool> state = input->inputState;
 
 		bool conversion = false;
-		bool parallel = false;
+		bool parallel = true;
 		if (conversion == false)
 		{
 			if (parallel == true)	//Parallel outer loop
