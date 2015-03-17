@@ -24,29 +24,31 @@ public:
 	  double vU = input->S0, vD = input->S0;
 	  state[input->n] = (std::max)(vU - input->K, 0.0);
 
-	  unsigned K = 1000;
+	  unsigned K_tbb = 1000;
 	  //parfor:
 	  if (n > 4000){
 		  typedef tbb::blocked_range<unsigned> my_range_t;
 		  
-		  my_range_t range(1, n, K);
+		  my_range_t range(1, n+1, K_tbb);
 		  auto f = [&](const my_range_t &chunk)
 		  {
-			  //double vU = input->S0*std::pow(u, (chunk.begin()));	//This is expensive, do it outside of the i loop
-			  //double vD = input->S0*std::pow(d, (chunk.begin()));
+			  double vU = input->S0*std::pow(u, (chunk.begin()));	//This is expensive, do it outside of the i loop
+			  double vD = input->S0*std::pow(d, (chunk.begin()));
 			  for (unsigned i = chunk.begin(); i != chunk.end(); i++)
 			  {
-				  vU = vU*u;
-				  vD = vD*d;
+				 
+				  //double vU = input->S0*std::pow(u, (i));	//This is expensive, do it outside of the i loop
+				  //double vD = input->S0*std::pow(d, (i));
 				  state[n + i] = (std::max)(vU - input->K, 0.0);
 				  state[n - i] = (std::max)(vD - input->K, 0.0);
+				  vU = vU*u;
+				  vD = vD*d;
 			  }
 		  };
 		  tbb::parallel_for(range, f, tbb::simple_partitioner());
 	  }
 	  else
 	  {
-		  //TODO: parfor here
 		  for (int i = 1; i <= n; i++){
 			  vU = vU*u;
 			  vD = vD*d;
@@ -100,7 +102,7 @@ public:
 				  state = tmp;
 			  }
 		  };
-		  tbb::parallel_for(tbb::blocked_range2d<unsigned>(0, n, K, 0, n, K), f2, tbb::simple_partitioner());
+		  tbb::parallel_for(tbb::blocked_range2d<unsigned>(0, n, K_tbb, 0, n, K_tbb), f2, tbb::simple_partitioner());
 	  }
 	  else
 	  {
@@ -157,7 +159,7 @@ public:
 			  for (int t = 0; t < n; t++){
 				  std::vector<double> tmp(state.size());	//std::vector<double> tmp = state;
 				  typedef tbb::blocked_range<unsigned> my_range_t;
-				  my_range_t range2(0, n, K);
+				  my_range_t range2(0, n, K_tbb);
 				  auto f2 = [&](const my_range_t &chunk2){	//look at moving this out of the loop
 					  double vU = input->S0*std::pow(u, (chunk2.begin()));	//This is expensive, do it outside of the i loop
 					  double vD = input->S0*std::pow(d, (chunk2.begin()));
@@ -170,6 +172,8 @@ public:
 						  vCD = (std::max)(vCD, vD - input->K);
 						  tmp[n + i] = vCU;
 						  tmp[n - i] = vCD;
+						  vU = vU*u;
+						  vD = vD*d;
 					  }
 				  };
 				  tbb::parallel_for(range2, f2, tbb::simple_partitioner());
@@ -180,7 +184,7 @@ public:
 		  {
 			  //Test code:
 			  for (int t = 0; t < n; t++){
-				  for (int i = 0; i < n/2; i++){
+				  for (int i = 0; i <= n/2; i++){
 					  vU = input->S0*std::pow(u, (i));	//Can raise this to the power
 					  vD = input->S0*std::pow(d, (i));
 					  double vCU = wU*state[n + i + 1] + wM*state[n + i] + wD*state[n + i - 1];	//state depends on the previous iteration (of outer loop)'s result
@@ -190,7 +194,9 @@ public:
 					  tmp[n + i] = vCU;
 					  tmp[n - i] = vCD;
 				  }
-				  for (int i = n/2; i < n; i++){
+				  for (int i = (n/2); i < n; i++){
+					/*  if (i = n-1)
+						  int asdsad = 0;*/
 					  vU = input->S0*std::pow(u, (i));	//Can raise this to the power
 					  vD = input->S0*std::pow(d, (i));
 					  double vCU = wU*state[n + i + 1] + wM*state[n + i] + wD*state[n + i - 1];	//state depends on the previous iteration (of outer loop)'s result
