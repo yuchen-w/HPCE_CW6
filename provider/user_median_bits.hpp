@@ -43,21 +43,22 @@ public:
 	else
 	{
 		//double parfor this!
-		
-		for (unsigned i = 0; i < input->n; i++){
-			uint32_t x = i*(7 + input->seed);
-			uint32_t y = 0;
-			uint32_t z = 0;
-			uint32_t w = 0;
-
-			for (unsigned j = 0; j < (unsigned)(std::log(16 + input->n) / std::log(1.1)); j++){
-				uint32_t t = x ^ (x << 11);
-				x = y; y = z; z = w;
-				w = w ^ (w >> 19) ^ t ^ (t >> 8);
+		unsigned tbb_K = 1000;
+		auto f = [&](const tbb::blocked_range2d<unsigned> &chunk) {
+			for (unsigned i = chunk.rows().begin(); i != chunk.rows().end(); i++){
+				uint32_t x = i*(7 + input->seed);
+				uint32_t y = 0;
+				uint32_t z = 0;
+				uint32_t w = 0;
+				for (unsigned j = chunk.cols().begin(); j != chunk.cols().end(); j++){
+					uint32_t t = x ^ (x << 11);
+					x = y; y = z; z = w;
+					w = w ^ (w >> 19) ^ t ^ (t >> 8);
+				}
+				temp[i] = w;
 			}
-
-			temp[i] = w;
-		}
+		};
+		tbb::parallel_for(tbb::blocked_range2d<unsigned>(0, input->n, tbb_K, 0, (unsigned)(std::log(16 + input->n) / std::log(1.1)), tbb_K), f, tbb::simple_partitioner());
 	}
 	log->LogInfo("Finding median, delta=%lg", puzzler::now() - tic);
 	tic = puzzler::now();
