@@ -42,7 +42,7 @@ public:
 	}
 	else
 	{
-		//double parfor this!
+		//double parfor!
 		unsigned tbb_K = 1000;
 		auto f = [&](const tbb::blocked_range2d<unsigned> &chunk) {
 			for (unsigned i = chunk.rows().begin(); i != chunk.rows().end(); i++){
