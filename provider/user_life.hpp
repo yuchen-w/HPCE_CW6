@@ -175,89 +175,80 @@ public:
 	  //Initialise OpenCL
 	  int opencl_flag = 1; //FLAG!
 
-	  
-	  std::vector<cl::Platform> platforms;
+		  std::vector<cl::Platform> platforms;
 
-	  cl::Platform::get(&platforms);
-	  if (platforms.size() == 0)
-		  throw std::runtime_error("No OpenCL platforms found.");
+		  cl::Platform::get(&platforms);
+		  if (platforms.size() == 0)
+			  throw std::runtime_error("No OpenCL platforms found.");
 
-	  std::cerr << "Found " << platforms.size() << " platforms\n";
-	  for (unsigned i = 0; i < platforms.size(); i++){
-		  std::string vendor = platforms[i].getInfo<CL_PLATFORM_VENDOR>();
-		  std::cerr << "  Platform " << i << " : " << vendor << "\n";
-	  }
-
-	  int selectedPlatform = 1;
-	  if (getenv("HPCE_SELECT_PLATFORM")){
-		  selectedPlatform = atoi(getenv("HPCE_SELECT_PLATFORM"));
-	  }
-	  std::cerr << "Choosing platform " << selectedPlatform << "\n";
-	  cl::Platform platform = platforms.at(selectedPlatform);
-
-	  std::vector<cl::Device> devices;
-	  platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
-	  if (devices.size() == 0){
-		  throw std::runtime_error("No opencl devices found.\n");
-	  }
-
-	  std::cerr << "Found " << devices.size() << " devices\n";
-	  for (unsigned i = 0; i < devices.size(); i++){
-		  std::string name = devices[i].getInfo<CL_DEVICE_NAME>();
-		  std::cerr << "  Device " << i << " : " << name << "\n";
-	  }
-
-	  int selectedDevice = 0;
-	  if (getenv("HPCE_SELECT_DEVICE")){
-		  selectedDevice = atoi(getenv("HPCE_SELECT_DEVICE"));
-	  }
-	  std::cerr << "Choosing device " << selectedDevice << "\n";
-	  cl::Device device = devices.at(selectedDevice);
-
-	  cl::Context context(devices);
-
-	  std::string kernelSource = LoadSource("user_life.cl");
-
-	  cl::Program::Sources sources;   // A vector of (data,length) pairs
-	  sources.push_back(std::make_pair(kernelSource.c_str(), kernelSource.size() + 1)); // push on our single string
-
-	  cl::Program program(context, sources);
-	  try{
-		  program.build(devices);
-	  }
-	  catch (...){
-		  for (unsigned i = 0; i < devices.size(); i++){
-			  std::cerr << "Log for device " << devices[i].getInfo<CL_DEVICE_NAME>() << ":\n\n";
-			  std::cerr << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[i]) << "\n\n";
+		  std::cerr << "Found " << platforms.size() << " platforms\n";
+		  for (unsigned i = 0; i < platforms.size(); i++){
+			  std::string vendor = platforms[i].getInfo<CL_PLATFORM_VENDOR>();
+			  std::cerr << "  Platform " << i << " : " << vendor << "\n";
 		  }
-		  throw;
-	  }
 
-	  size_t cbBuffer = 4*n*n;
-	  cl::Buffer currbuf(context, CL_MEM_READ_WRITE, cbBuffer, NULL);
-	  cl::Buffer nextbuf(context, CL_MEM_READ_WRITE, cbBuffer, NULL);
+		  int selectedPlatform = 1;
+		  if (getenv("HPCE_SELECT_PLATFORM")){
+			  selectedPlatform = atoi(getenv("HPCE_SELECT_PLATFORM"));
+		  }
+		  std::cerr << "Choosing platform " << selectedPlatform << "\n";
+		  cl::Platform platform = platforms.at(selectedPlatform);
 
-	  cl::CommandQueue queue(context, device);
+		  std::vector<cl::Device> devices;
+		  platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
+		  if (devices.size() == 0){
+			  throw std::runtime_error("No opencl devices found.\n");
+		  }
 
-	  std::vector<uint32_t> state_int(state.begin(), state.end());
+		  std::cerr << "Found " << devices.size() << " devices\n";
+		  for (unsigned i = 0; i < devices.size(); i++){
+			  std::string name = devices[i].getInfo<CL_DEVICE_NAME>();
+			  std::cerr << "  Device " << i << " : " << name << "\n";
+		  }
 
-	  //for (int i = 0; i < n; i++){
-		 // //state_int[i] = (int)state[i];
-		 // if (state[i] == true)
-			//  state_int[i] = 1;
-		 // else
-			//  state_int[i] = 0;
-	  //}
+		  int selectedDevice = 0;
+		  if (getenv("HPCE_SELECT_DEVICE")){
+			  selectedDevice = atoi(getenv("HPCE_SELECT_DEVICE"));
+		  }
+		  std::cerr << "Choosing device " << selectedDevice << "\n";
+		  cl::Device device = devices.at(selectedDevice);
 
-	  queue.enqueueWriteBuffer(currbuf, CL_TRUE, 0, cbBuffer, &state_int[0]);
+		  cl::Context context(devices);
 
-	  cl::NDRange offset(0, 0);               // Always start iterations at x=0, y=0
-	  cl::NDRange globalSize(n, n);   // Global size must match the original loops
-	  cl::NDRange localSize = cl::NullRange;    // We don't care about local size
+		  std::string kernelSource = LoadSource("user_life.cl");
 
-	  cl::Kernel kernel_updateCL(program, "update_cl");
+		  cl::Program::Sources sources;   // A vector of (data,length) pairs
+		  sources.push_back(std::make_pair(kernelSource.c_str(), kernelSource.size() + 1)); // push on our single string
 
+		  cl::Program program(context, sources);
+		  try{
+			  program.build(devices);
+		  }
+		  catch (...){
+			  for (unsigned i = 0; i < devices.size(); i++){
+				  std::cerr << "Log for device " << devices[i].getInfo<CL_DEVICE_NAME>() << ":\n\n";
+				  std::cerr << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[i]) << "\n\n";
+			  }
+			  throw;
+		  }
 
+		  size_t cbBuffer = 4 * n*n;
+		  cl::Buffer currbuf(context, CL_MEM_READ_WRITE, cbBuffer, NULL);
+		  cl::Buffer nextbuf(context, CL_MEM_READ_WRITE, cbBuffer, NULL);
+
+		  cl::CommandQueue queue(context, device);
+
+		  std::vector<int> state_int(state.begin(), state.end());
+
+		  queue.enqueueWriteBuffer(currbuf, CL_TRUE, 0, cbBuffer, &state_int[0]);
+
+		  cl::NDRange offset(0, 0);               // Always start iterations at x=0, y=0
+		  cl::NDRange globalSize(n, n);   // Global size must match the original loops
+		  cl::NDRange localSize = cl::NullRange;    // We don't care about local size
+
+		  cl::Kernel kernel_updateCL(program, "update_cl");
+
+	 
 
 
 
@@ -265,24 +256,8 @@ public:
 		  log->LogVerbose("Starting iteration %d of %d\n", i, input->steps);
 
 
-		  if (opencl_flag == 0){
-			  //std::vector<bool> next(n*n);
-			  ////Parallelised next[]=
-			  //unsigned K = 10;
-
-			  //auto f = [&](const tbb::blocked_range2d<unsigned> &chunk) {
-				 // for (unsigned x = chunk.rows().begin(); x != chunk.rows().end(); x++){
-					//  for (unsigned y = chunk.cols().begin(); y != chunk.cols().end(); y++){
-					//	  next[y*n + x] = update_unroll(n, state, x, y);
-					//  }
-				 // }
-			  //};
-			  //tbb::parallel_for(tbb::blocked_range2d<unsigned>(0, n, K, 0, n, K), f, tbb::simple_partitioner());
-			  //state = next;
-
-		  }
-		  else {
-
+		  if (opencl_flag == 1){
+			  
 			  kernel_updateCL.setArg(0, n);
 			  kernel_updateCL.setArg(1, currbuf);
 			  kernel_updateCL.setArg(2, nextbuf);
@@ -291,6 +266,23 @@ public:
 
 			  std::swap(currbuf, nextbuf);
 
+		  }
+		  else {
+
+
+			  std::vector<bool> next(n*n);
+			  //Parallelised next[]=
+			  unsigned K = 10;
+
+			  auto f = [&](const tbb::blocked_range2d<unsigned> &chunk) {
+				  for (unsigned x = chunk.rows().begin(); x != chunk.rows().end(); x++){
+					  for (unsigned y = chunk.cols().begin(); y != chunk.cols().end(); y++){
+						  next[y*n + x] = update_unroll(n, state, x, y);
+					  }
+				  }
+			  };
+			  tbb::parallel_for(tbb::blocked_range2d<unsigned>(0, n, K, 0, n, K), f, tbb::simple_partitioner());
+			  state = next;			  
 
 			  }
 
@@ -313,29 +305,17 @@ public:
 
 		  log->LogVerbose("Finished steps");
 
-		  //if (opencl_flag == 1) {
+		  if (opencl_flag == 1) {
 			  queue.enqueueReadBuffer(currbuf, CL_TRUE, 0, cbBuffer, &state_int[0]);
 
 
 			  for (int i = 0; i < n*n; i++){
 				  state[i] = (bool)state_int[i];
-
-				  /*if (state_int[i] == 1)
-					state[i] = true;
-				  else
-					state[i] = false;*/
 			  }
-
-		  output->state = state;
-
-
-
-		  /*if (opencl_flag == 0){
-		  output->state = state;
 		  }
-		  else {*/
-			  //queue.enqueueReadBuffer(currbuf, CL_TRUE, 0, cbBuffer, &output->state[0]);
-		  /*}*/
+
+		  output->state = state;
+
 	  }
   
 
