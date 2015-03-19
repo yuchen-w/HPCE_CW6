@@ -22,22 +22,43 @@ public:
 	double tic = puzzler::now();
 
 	std::vector<uint32_t> temp(input->n);
+	bool parallel = true;
+	if (parallel == false)
+	{
+		for (unsigned i = 0; i < input->n; i++){
+			uint32_t x = i*(7 + input->seed);
+			uint32_t y = 0;
+			uint32_t z = 0;
+			uint32_t w = 0;
 
-	for (unsigned i = 0; i<input->n; i++){
-		uint32_t x = i*(7 + input->seed);
-		uint32_t y = 0;
-		uint32_t z = 0;
-		uint32_t w = 0;
+			for (unsigned j = 0; j < (unsigned)(std::log(16 + input->n) / std::log(1.1)); j++){
+				uint32_t t = x ^ (x << 11);
+				x = y; y = z; z = w;
+				w = w ^ (w >> 19) ^ t ^ (t >> 8);
+			}
 
-		for (unsigned j = 0; j<(unsigned)(std::log(16 + input->n) / std::log(1.1)); j++){
-			uint32_t t = x ^ (x << 11);
-			x = y; y = z; z = w;
-			w = w ^ (w >> 19) ^ t ^ (t >> 8);
+			temp[i] = w;
 		}
-
-		temp[i] = w;
 	}
+	else
+	{
+		//double parfor this!
+		
+		for (unsigned i = 0; i < input->n; i++){
+			uint32_t x = i*(7 + input->seed);
+			uint32_t y = 0;
+			uint32_t z = 0;
+			uint32_t w = 0;
 
+			for (unsigned j = 0; j < (unsigned)(std::log(16 + input->n) / std::log(1.1)); j++){
+				uint32_t t = x ^ (x << 11);
+				x = y; y = z; z = w;
+				w = w ^ (w >> 19) ^ t ^ (t >> 8);
+			}
+
+			temp[i] = w;
+		}
+	}
 	log->LogInfo("Finding median, delta=%lg", puzzler::now() - tic);
 	tic = puzzler::now();
 
