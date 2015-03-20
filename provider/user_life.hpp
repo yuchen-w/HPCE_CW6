@@ -15,27 +15,27 @@
 #include <streambuf>
 
 //OpenCL contents
-std::string LoadSource(const char *fileName)
-{
-	// Don't forget to change your_login here
-	std::string baseDir = "provider";
-	if (getenv("HPCE_CL_SRC_DIR")){
-		baseDir = getenv("HPCE_CL_SRC_DIR");
-	}
-
-	std::string fullName = baseDir + "/" + fileName;
-
-	// Open a read-only binary stream over the file
-	std::ifstream src(fullName, std::ios::in | std::ios::binary);
-	if (!src.is_open())
-		throw std::runtime_error("LoadSource : Couldn't load cl file from '" + fullName + "'.");
-
-	// Read all characters of the file into a string
-	return std::string(
-		(std::istreambuf_iterator<char>(src)), // Node the extra brackets.
-		std::istreambuf_iterator<char>()
-		);
-}
+//std::string LoadSource(const char *fileName)
+//{
+//	// Don't forget to change your_login here
+//	std::string baseDir = "provider";
+//	if (getenv("HPCE_CL_SRC_DIR")){
+//		baseDir = getenv("HPCE_CL_SRC_DIR");
+//	}
+//
+//	std::string fullName = baseDir + "/" + fileName;
+//
+//	// Open a read-only binary stream over the file
+//	std::ifstream src(fullName, std::ios::in | std::ios::binary);
+//	if (!src.is_open())
+//		throw std::runtime_error("LoadSource : Couldn't load cl file from '" + fullName + "'.");
+//
+//	// Read all characters of the file into a string
+//	return std::string(
+//		(std::istreambuf_iterator<char>(src)), // Node the extra brackets.
+//		std::istreambuf_iterator<char>()
+//		);
+//}
 
 
 
@@ -173,7 +173,11 @@ public:
 	  });
 
 	  //Initialise OpenCL
-	  int opencl_flag = 1; //FLAG!
+	  //Choosing TBB or OpenCL
+	  int opencl_flag = 0;
+	  if (getenv("HPCE_SELECT_OPENCL")){
+		  opencl_flag = atoi(getenv("HPCE_SELECT_OPENCL"));
+	  }
 
 		  std::vector<cl::Platform> platforms;
 
@@ -248,59 +252,64 @@ public:
 
 		  cl::Kernel kernel_updateCL(program, "update_cl");
 
-	 
-
-
-
-	  for (unsigned i = 0; i < input->steps; i++){
-		  log->LogVerbose("Starting iteration %d of %d\n", i, input->steps);
-
-
 		  if (opencl_flag == 1){
-			  
-			  kernel_updateCL.setArg(0, n);
-			  kernel_updateCL.setArg(1, currbuf);
-			  kernel_updateCL.setArg(2, nextbuf);
-			  queue.enqueueNDRangeKernel(kernel_updateCL, offset, globalSize, localSize);
-			  queue.enqueueBarrier();
+			  for (unsigned i = 0; i < input->steps; i++){
+				  log->LogVerbose("OpenCL: Starting iteration %d of %d\n", i, input->steps);
+				  kernel_updateCL.setArg(0, n);
+				  kernel_updateCL.setArg(1, currbuf);
+				  kernel_updateCL.setArg(2, nextbuf);
+				  queue.enqueueNDRangeKernel(kernel_updateCL, offset, globalSize, localSize);
+				  queue.enqueueBarrier();
 
-			  std::swap(currbuf, nextbuf);
+				  std::swap(currbuf, nextbuf);
 
+				  // The weird form of log is so that there is little overhead
+				  // if logging is disabled
+				  log->Log(puzzler::Log_Debug, [&](std::ostream &dst){
+					  dst << "\n";
+					  for (unsigned y = 0; y < n; y++){
+						  for (unsigned x = 0; x < n; x++){
+							  dst << (state[y*n + x] ? 'x' : ' ');
+						  }
+						  dst << "\n";
+					  }
+				  });
+
+			  }
 		  }
 		  else {
+			  for (unsigned i = 0; i < input->steps; i++){
+				  log->LogVerbose("TBB: Starting iteration %d of %d\n", i, input->steps);
 
+				  std::vector<bool> next(n*n);
+				  //Parallelised next[]=
+				  unsigned K = 10;
 
-			  std::vector<bool> next(n*n);
-			  //Parallelised next[]=
-			  unsigned K = 10;
-
-			  auto f = [&](const tbb::blocked_range2d<unsigned> &chunk) {
-				  for (unsigned x = chunk.rows().begin(); x != chunk.rows().end(); x++){
-					  for (unsigned y = chunk.cols().begin(); y != chunk.cols().end(); y++){
-						  next[y*n + x] = update_unroll(n, state, x, y);
+				  auto f = [&](const tbb::blocked_range2d<unsigned> &chunk) {
+					  for (unsigned x = chunk.rows().begin(); x != chunk.rows().end(); x++){
+						  for (unsigned y = chunk.cols().begin(); y != chunk.cols().end(); y++){
+							  next[y*n + x] = update_unroll(n, state, x, y);
+						  }
 					  }
-				  }
-			  };
-			  tbb::parallel_for(tbb::blocked_range2d<unsigned>(0, n, K, 0, n, K), f, tbb::simple_partitioner());
-			  state = next;			  
+				  };
+				  tbb::parallel_for(tbb::blocked_range2d<unsigned>(0, n, K, 0, n, K), f, tbb::simple_partitioner());
+				  state = next;
+
+				  // The weird form of log is so that there is little overhead
+				  // if logging is disabled
+				  log->Log(puzzler::Log_Debug, [&](std::ostream &dst){
+					  dst << "\n";
+					  for (unsigned y = 0; y < n; y++){
+						  for (unsigned x = 0; x < n; x++){
+							  dst << (state[y*n + x] ? 'x' : ' ');
+						  }
+						  dst << "\n";
+					  }
+				  });
 
 			  }
 
-
-
-			  // The weird form of log is so that there is little overhead
-			  // if logging is disabled
-			  log->Log(puzzler::Log_Debug, [&](std::ostream &dst){
-				  dst << "\n";
-				  for (unsigned y = 0; y < n; y++){
-					  for (unsigned x = 0; x < n; x++){
-						  dst << (state[y*n + x] ? 'x' : ' ');
-					  }
-					  dst << "\n";
-				  }
-			  });
 		  }
-
 
 
 		  log->LogVerbose("Finished steps");

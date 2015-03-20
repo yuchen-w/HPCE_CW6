@@ -1,7 +1,8 @@
-__kernel void update_cl(int const n, __global int *curr, __global int *next) {
+__kernel void update_cl(int const nt, __global int *curr, __global int *next) {
 
 	uint x = get_global_id(0);
 	uint y = get_global_id(1);
+	uint n = get_global_size(0);
 
 	int neighbours = 0;
 	int ox = 0;
@@ -106,7 +107,4 @@ __kernel void update_cl(int const n, __global int *curr, __global int *next) {
 			next[y*n + x] = 0;
 		}
 	}
-	
-	//next[y*n + x] = 1;
-
 }
