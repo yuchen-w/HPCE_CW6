@@ -9,6 +9,21 @@ TBB was used to optimise these functions in the first instance.
 
 Some functions that looked like they could be improved with OpenCL were implemented in OpenCL.
 
+###Life
+life.hpp 
+
+###Matrix_exponent
+matrix_exponent
+
+###Median_bits
+median_bits
+
+###Option_explicit
+option_explicit
+
+###String_search
+string_search
+
 Testing Methodology
 -------------------
 
