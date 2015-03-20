@@ -10,7 +10,7 @@ TBB was used to optimise these functions in the first instance.
 Some functions that looked like they could be improved with OpenCL were implemented in OpenCL.
 
 ###Life
-life.hpp 
+Within the `update` function, the 2 `for` loops for `dx` and `dy` 
 
 ###Matrix_exponent
 matrix_exponent
