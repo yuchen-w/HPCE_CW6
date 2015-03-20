@@ -21,7 +21,13 @@ Testing is done and here's the graph
 
 
 ###Matrix_exponent
-matrix_exponent
+The function that took most time is `MatrixMul` since it contains 3 loops, each over `n` iterations. The operation within `MatrixMul` does not have any dependencies, providing scope to parallel the operations. 
+
+For TBB, a new function `MatrixMul_tbb` is created and once again, the library `tbb::parallel_for` with a `tbb::blocked_range2d` is used. For OpenCL, a kernel `MatrixMul` is created to perform the same function. 
+
+#####Approach to improve performance
+Testing is done and here's the graph
+
 
 ###Median_bits
 median_bits
