@@ -10,7 +10,15 @@ TBB was used to optimise these functions in the first instance.
 Some functions that looked like they could be improved with OpenCL were implemented in OpenCL.
 
 ###Life
-Within the `update` function, the 2 `for` loops for `dx` and `dy` 
+Within the `update` function, the 2 `for` loops for `dx` and `dy` only operates the function 9 times. By manually expand the operation to eliminate the need of this `for` loop, performance is increased. [Perhaps check this - just call the different .cl file for openCL, tbbto call update_unroll.
+
+For TBB, the calling of update is parallelised since it loops `n`*`n` times, the library `tbb::parallel_for` with a `tbb::blocked_range2d` is used.
+
+For OpenCL, the implementation is a bit more tricky since `bool` variables cannot be used as a kernal variable. Hence the vector `state` is turned into a `int` vector for kernel operations. It is also noted that `.at` is a C++ function, so it is replaced to simply calling the vector index directly.
+
+#####Approach to improve performance
+Testing is done and here's the graph
+
 
 ###Matrix_exponent
 matrix_exponent
