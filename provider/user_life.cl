@@ -1,4 +1,4 @@
-__kernel void update_cl(int const nt, __global int *curr, __global int *next) {
+__kernel void update_cl(__global int *curr, __global int *next) {
 
 	uint x = get_global_id(0);
 	uint y = get_global_id(1);
