@@ -1,5 +1,8 @@
 SHELL=/bin/bash
 
+OPENCL_INCLUDES = -I src -I opencl_sdk/include -I include -L opencl_sdk/lib/cygwin/x86_64
+OPENCL_LIBS = -lOpenCL
+
 CPPFLAGS += -std=c++11 -W -Wall  -g
 CPPFLAGS += -O3
 CPPFLAGS += -I include
@@ -20,6 +23,6 @@ lib/libpuzzler.a : provider/*.cpp provider/*.hpp
 
 bin/% : src/%.cpp lib/libpuzzler.a
 	-mkdir -p bin
-	$(CXX) $(CPPFLAGS) $(tbbCPPFLAGS) -o $@ $^ $(XLINKER) $(tbbLDFLAGS) $(tbbLDLIBS) $(LDFLAGS) $(LDLIBS) -Llib -lpuzzler
+	$(CXX) $(CPPFLAGS) $(tbbCPPFLAGS) $(OPENCL_INCLUDES) -o $@ $^ $(XLINKER) $(tbbLDFLAGS) $(tbbLDLIBS) $(LDFLAGS) $(LDLIBS) $(OPENCL_LIBS) -Llib -lpuzzler
 
 all : bin/execute_puzzle bin/create_puzzle_input bin/run_puzzle bin/compare_puzzle_output
