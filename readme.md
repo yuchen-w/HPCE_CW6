@@ -12,13 +12,14 @@ Some functions that looked like they could be improved with OpenCL were implemen
 ###Life
 Within the `update` function, the 2 `for` loops for `dx` and `dy` only operates the function 9 times. By manually expand the operation to eliminate the need of this `for` loop, performance is increased. [Perhaps check this - just call the different .cl file for openCL, tbbto call update_unroll.
 
-With n=100
+The duration taken for the script to execute was measured with an example of `n`=100 and the results are as follows:
 
 | |With given code | With loop unrolled|
 |------------- |------------- | ------------- |
 |TBB|17.44| 16.38
 |OpenCL| 0.33|0.34
 
+The unrolled loop provide a minor improvement for TBB and about the same performance for OpenCL. It is assummed that OpenCL operations are so quick anyway that those 2 short `for` loops will not provide much improvement in actual time. 
 
 For TBB, the calling of update is parallelised since it loops `n`*`n` times, the library `tbb::parallel_for` with a `tbb::blocked_range2d` is used.
 
