@@ -35,7 +35,20 @@ private:
 			unsigned nandSrc = src - input->flipFlopCount;
 			bool a = calcSrc(input->nandGateInputs.at(nandSrc).first, state, input);
 			bool b = calcSrc(input->nandGateInputs.at(nandSrc).second, state, input);
-			return !(a&&b);
+			return (char) !(a&&b);
+		}
+	}
+
+	int calcSrc(unsigned src, const std::vector<int> &state, const puzzler::CircuitSimInput *input) const
+	{
+		if (src < input->flipFlopCount){
+			return state.at(src);
+		}
+		else{
+			unsigned nandSrc = src - input->flipFlopCount;
+			bool a = calcSrc(input->nandGateInputs.at(nandSrc).first, state, input);
+			bool b = calcSrc(input->nandGateInputs.at(nandSrc).second, state, input);
+			return (int) !(a&&b);
 		}
 	}
 
@@ -152,6 +165,22 @@ private:
 	std::vector<char> next_tbb(const std::vector<char> &state, const puzzler::CircuitSimInput *input) const
 	{
 		std::vector<char> res(state.size());
+		int K = 100;
+		typedef tbb::blocked_range<unsigned> my_range_t;
+		my_range_t range(0, res.size(), K);
+		auto f = [&](const my_range_t &chunk)
+		{
+			for (unsigned i = chunk.begin(); i != chunk.end(); i++){
+				res[i] = calcSrc(input->flipFlopInputs[i], state, input);
+			}
+		};
+		tbb::parallel_for(range, f, tbb::simple_partitioner());
+		return res;
+	}
+
+	std::vector<int> next_tbb(const std::vector<int> &state, const puzzler::CircuitSimInput *input) const
+	{
+		std::vector<int> res(state.size());
 		int K = 100;
 		typedef tbb::blocked_range<unsigned> my_range_t;
 		my_range_t range(0, res.size(), K);
