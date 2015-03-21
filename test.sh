@@ -1,5 +1,5 @@
 #!/bin/bash
-testvar="1 2 3 4 8 16 32 64 128 1024 2048 8192 16000"
+testvar="1 2 3 4 8 16 32 64 128 1024 2048 4096"
 #testvar="1 2 3 4 8 16"
 echo "Running median_bits"
 rm median_bits.log
