@@ -179,7 +179,7 @@ public:
 			opencl_flag = atoi(getenv("HPCE_SELECT_OPENCL"));
 		}
 		
-		fprintf(stderr, "OpenCL env variable got \n");
+		fprintf(stderr, "OpenCL env variable got. opencl_flag = %d \n", opencl_flag);
 		std::vector<cl::Platform> platforms;
 
 		cl::Platform::get(&platforms);
