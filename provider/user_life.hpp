@@ -171,6 +171,7 @@ public:
 				dst << "\n";
 			}
 		});
+		fprintf(stderr, "About to read Env Variable \n");
 		//Initialise OpenCL
 		//Choosing TBB or OpenCL
 		int opencl_flag = 0;
@@ -178,11 +179,14 @@ public:
 			opencl_flag = atoi(getenv("HPCE_SELECT_OPENCL"));
 		}
 		if (opencl_flag == 1){
+			fprintf(stderr, "OpenCL env variable got. opencl_flag = %d \n", opencl_flag);
 			std::vector<cl::Platform> platforms;
 
 			cl::Platform::get(&platforms);
 			if (platforms.size() == 0)
 				throw std::runtime_error("No OpenCL platforms found.");
+			
+			fprintf(stderr, "Got platforms \n");
 			
 			std::cerr << "Found " << platforms.size() << " platforms\n";
 			for (unsigned i = 0; i < platforms.size(); i++){
@@ -197,6 +201,8 @@ public:
 			std::cerr << "Choosing platform " << selectedPlatform << "\n";
 			cl::Platform platform = platforms.at(selectedPlatform);
 
+			fprintf(stderr, "Selected platforms \n");
+
 			std::vector<cl::Device> devices;
 			platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
 			if (devices.size() == 0){
@@ -208,6 +214,8 @@ public:
 				std::string name = devices[i].getInfo<CL_DEVICE_NAME>();
 				std::cerr << "  Device " << i << " : " << name << "\n";
 			}
+
+			fprintf(stderr, "OpenCL devices set up \n");
 
 			int selectedDevice = 0;
 			if (getenv("HPCE_SELECT_DEVICE")){
@@ -291,6 +299,7 @@ public:
 		}
 		else{
 			for (unsigned i = 0; i < input->steps; i++){
+				fprintf(stderr, "Launching TBB \n");
 				log->LogVerbose("TBB: Starting iteration %d of %d\n", i, input->steps);
 
 				std::vector<bool> next(n*n);
