@@ -1,5 +1,6 @@
 #!/bin/bash
 testvar="1 2 3 4 8 16 32 64 128 1024 4096 16000"
+#testvar="1 2 3 4 8 16"
 echo "Running median_bits"
 for i in $testvar; do
 	./bin/run_puzzle median_bits $i 2 2>> median_bits.log
@@ -20,6 +21,7 @@ for i in $testvar; do
 	#echo "Reference time = '${
 done
 ##############
+echo "Running circuit_sim"
 for i in $testvar; do
 	./bin/run_puzzle circuit_sim $i 2 2>> circuit_sim.log
 done
