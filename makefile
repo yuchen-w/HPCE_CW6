@@ -23,6 +23,6 @@ lib/libpuzzler.a : provider/*.cpp provider/*.hpp
 
 bin/% : src/%.cpp lib/libpuzzler.a
 	-mkdir -p bin
-	$(CXX) $(CPPFLAGS) -o $@ $^ $(XLINKER) $(tbbLDFLAGS) $(tbbLDLIBS) -Llibs -lpuzzler
+	$(CXX) $(CPPFLAGS) -o $@ $^ $(XLINKER) $(tbbLDFLAGS) $(tbbLDLIBS) -Llib -lpuzzler
 
 all : bin/test_opencl bin/execute_puzzle bin/create_puzzle_input bin/run_puzzle bin/compare_puzzle_output
