@@ -1,9 +1,10 @@
 #!/bin/bash
-testvar="1 2 3 4 8 16 32 64 128 1024 2048 4096"
+testvar="1 2 3 4 8 16 32 64 128 1024 2048 4096 8096"
+testvar_mb="1 2 3 4 8 16 32 64 128 1024 2048 4096 8096 160000 320000"
 #testvar="1 2 3 4 8 16"
 echo "Running median_bits"
 rm median_bits.log
-for i in $testvar; do
+for i in $testvar_mb; do
 	./bin/run_puzzle median_bits $i 2 2>> median_bits.log
 done
 	
@@ -12,7 +13,7 @@ declare -a t_start_ref=($(cat median_bits.log | grep "Executing reference" | sed
 declare -a t_end_ref=($(cat median_bits.log | grep "Checking output" | sed 's/.*\],//;s/,.*$//') )
 echo $(cat median_bits.log | grep "Output is not correct")
 j=0
-for i in $testvar; do
+for i in $testvar_mb; do
 	echo "For puzzle size '$i'"
 	echo "Execution time:"
 	echo ${t_start_ref[j]}-${t_start[j]} | bc -l
@@ -43,7 +44,7 @@ for i in $testvar; do
 	#echo "Reference time = '${
 done
 ###############
-testvarlife="1 2 3 4 8 16 32 64 128"
+testvarlife="1 2 3 4 8 16 32 64 128 256"
 echo "Running life"
 rm life.log
 for i in $testvarlife; do
