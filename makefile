@@ -1,6 +1,6 @@
 SHELL=/bin/bash
 
-OPENCL_INCLUDES = -I src -I opencl_sdk/include -I include -L opencl_sdk/lib/cygwin/x86_64
+OPENCL_INCLUDES = -I src -I opencl_sdk/include -I include -L opencl_sdk/lib/cygwin/x86_64 -lOpenCL
 OPENCL_LIBS = -lOpenCL
 
 CPPFLAGS += -std=c++11 -W -Wall  -g

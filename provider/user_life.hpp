@@ -185,7 +185,9 @@ public:
 			cl::Platform::get(&platforms);
 			if (platforms.size() == 0)
 				throw std::runtime_error("No OpenCL platforms found.");
-
+			
+			fprintf(stderr, "Got platforms \n");
+			
 			std::cerr << "Found " << platforms.size() << " platforms\n";
 			for (unsigned i = 0; i < platforms.size(); i++){
 				std::string vendor = platforms[i].getInfo<CL_PLATFORM_VENDOR>();
@@ -198,6 +200,8 @@ public:
 			}
 			std::cerr << "Choosing platform " << selectedPlatform << "\n";
 			cl::Platform platform = platforms.at(selectedPlatform);
+
+			fprintf(stderr, "Selected platforms \n");
 
 			std::vector<cl::Device> devices;
 			platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
