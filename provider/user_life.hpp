@@ -310,7 +310,7 @@ public:
 			  queue.enqueueReadBuffer(currbuf, CL_TRUE, 0, cbBuffer, &state_int[0]);
 
 
-			  for (int i = 0; i < n*n; i++){
+			  for (unsigned i = 0; i < n*n; i++){
 				  state[i] = (bool)state_int[i];
 			  }
 		  }
