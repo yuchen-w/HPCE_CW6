@@ -171,14 +171,14 @@ public:
 			  dst << "\n";
 		  }
 	  });
-
+	 fprintf(stderr, "Initialising OpenCL... \n");
 	  //Initialise OpenCL
 	  //Choosing TBB or OpenCL
 	  int opencl_flag = 0;
 	  if (getenv("HPCE_SELECT_OPENCL")){
 		  opencl_flag = atoi(getenv("HPCE_SELECT_OPENCL"));
 	  }
-
+		fprintf(stderr, "OpenCL selected \n");
 		  std::vector<cl::Platform> platforms;
 
 		  cl::Platform::get(&platforms);
@@ -269,6 +269,7 @@ public:
 			  
 		  }
 		  else {
+			fprintf(stderr, "Launching TBB \n");
 			  log->LogVerbose("TBB: Starting iteration %d of %d\n", i, input->steps);
 
 			  std::vector<bool> next(n*n);
