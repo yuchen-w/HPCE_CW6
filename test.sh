@@ -2,6 +2,7 @@
 testvar="1 2 3 4 8 16 32 64 128 1024 2048 8192 16000"
 #testvar="1 2 3 4 8 16"
 echo "Running median_bits"
+rm median_bits.log
 for i in $testvar; do
 	./bin/run_puzzle median_bits $i 2 2>> median_bits.log
 done
@@ -22,6 +23,7 @@ for i in $testvar; do
 done
 ##############
 echo "Running circuit_sim"
+rm circuit_sim.log
 for i in $testvar; do
 	./bin/run_puzzle circuit_sim $i 2 2>> circuit_sim.log
 done
@@ -43,6 +45,7 @@ done
 ###############
 testvarlife="1 2 3 4 8 16 32 64 128"
 echo "Running life"
+rm life.log
 for i in $testvarlife; do
 	./bin/run_puzzle life $i 2 2>> life.log
 done
@@ -64,6 +67,7 @@ done
 
 ###############
 echo "Running matrix_exponent"
+rm matrix_exponent.log
 for i in $testvar; do
 	./bin/run_puzzle matrix_exponent $i 2 2>> matrix_exponent.log
 done
@@ -86,6 +90,7 @@ done
 
 ###############
 echo "Running option_explicit"
+rm option_explicit.log
 for i in $testvar; do
 	./bin/run_puzzle option_explicit $i 2 2>> option_explicit.log
 done
@@ -108,6 +113,7 @@ done
 
 ###############
 echo "Running string_search"
+rm string_search.log
 for i in $testvar; do
 	./bin/run_puzzle string_search $i 2 2>> string_search.log
 done

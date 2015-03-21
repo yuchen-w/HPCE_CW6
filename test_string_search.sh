@@ -1,5 +1,6 @@
 #!/bin/bash
 testvar="1 2 3 4 8 16 32 64 128 1024 4096 16000"
+rm string_search.log
 for i in $testvar; do
 	./bin/run_puzzle string_search $i 2 2>> string_search.log
 done
