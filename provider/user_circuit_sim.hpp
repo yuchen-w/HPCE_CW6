@@ -213,13 +213,13 @@ public:
 
 		for (unsigned i = 0; i < state_char.size(); i++)
 		{
-			state_int[i] = (int)state[i];
+			state_char[i] = (int)state[i];
 		}
 
 		for (unsigned i = 0; i < input->clockCycles; i++){
 			log->LogVerbose("Starting iteration %d of %d\n", i, input->clockCycles);
 
-			state_int = next_tbb(state_int, input);
+			state_char = next_tbb(state_char, input);
 
 			// The weird form of log is so that there is little overhead
 			// if logging is disabled
@@ -231,7 +231,7 @@ public:
 		}
 		for (unsigned i = 0; i < state_char.size(); i++)
 		{
-			state[i] = (bool)state_int[i];
+			state[i] = (bool)state_char[i];
 		}
 
 	//Parallel
