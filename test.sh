@@ -1,5 +1,5 @@
 #!/bin/bash
-testvar="1 2 3 4 8 16 32 64 128 1024 4096 16000"
+testvar="1 2 3 4 8 16 32 64 128 1024 2048 8192 16000"
 #testvar="1 2 3 4 8 16"
 echo "Running median_bits"
 for i in $testvar; do
@@ -41,8 +41,9 @@ for i in $testvar; do
 	#echo "Reference time = '${
 done
 ###############
+testvarlife = "1 2 3 4 8 16 32 64 128"
 echo "Running life"
-for i in $testvar; do
+for i in $testvarlife; do
 	./bin/run_puzzle life $i 2 2>> life.log
 done
 	
