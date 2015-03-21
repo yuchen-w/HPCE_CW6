@@ -55,7 +55,7 @@ declare -a t_start_ref=($(cat life.log | grep "Executing reference" | sed 's/.*\
 declare -a t_end_ref=($(cat life.log | grep "Checking output" | sed 's/.*\],//;s/,.*$//') )
 echo $(cat life.log | grep "Output is not correct")
 j=0
-for i in $testvar; do
+for i in $testvarlife; do
 	echo "For puzzle size '$i'"
 	echo "Execution time:"
 	echo ${t_start_ref[j]}-${t_start[j]} | bc -l
