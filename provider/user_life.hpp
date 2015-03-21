@@ -178,7 +178,7 @@ public:
 		if (getenv("HPCE_SELECT_OPENCL")){
 			opencl_flag = atoi(getenv("HPCE_SELECT_OPENCL"));
 		}
-		
+
 		fprintf(stderr, "OpenCL env variable got. opencl_flag = %d \n", opencl_flag);
 		std::vector<cl::Platform> platforms;
 
@@ -210,58 +210,57 @@ public:
 			std::string name = devices[i].getInfo<CL_DEVICE_NAME>();
 			std::cerr << "  Device " << i << " : " << name << "\n";
 		}
-		
+
 		fprintf(stderr, "OpenCL devices set up \n");
 
 		int selectedDevice = 0;
 		if (getenv("HPCE_SELECT_DEVICE")){
 			selectedDevice = atoi(getenv("HPCE_SELECT_DEVICE"));
 		}
-		std::cerr << "Choosing device " << selectedDevice << "\n";
-		cl::Device device = devices.at(selectedDevice);
+		if (selectedDevice == 1){
+			std::cerr << "Choosing device " << selectedDevice << "\n";
+			cl::Device device = devices.at(selectedDevice);
 
-		cl::Context context(devices);
+			cl::Context context(devices);
 
-		std::string kernelSource = LoadSource("user_life.cl");
+			std::string kernelSource = LoadSource("user_life.cl");
 
-		cl::Program::Sources sources;   // A vector of (data,length) pairs
-		sources.push_back(std::make_pair(kernelSource.c_str(), kernelSource.size() + 1)); // push on our single string
+			cl::Program::Sources sources;   // A vector of (data,length) pairs
+			sources.push_back(std::make_pair(kernelSource.c_str(), kernelSource.size() + 1)); // push on our single string
 
-		cl::Program program(context, sources);
-		try{
-			program.build(devices);
-		}
-		catch (...){
-			for (unsigned i = 0; i < devices.size(); i++){
-				std::cerr << "Log for device " << devices[i].getInfo<CL_DEVICE_NAME>() << ":\n\n";
-				std::cerr << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[i]) << "\n\n";
+			cl::Program program(context, sources);
+			try{
+				program.build(devices);
 			}
-			throw;
-		}
+			catch (...){
+				for (unsigned i = 0; i < devices.size(); i++){
+					std::cerr << "Log for device " << devices[i].getInfo<CL_DEVICE_NAME>() << ":\n\n";
+					std::cerr << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[i]) << "\n\n";
+				}
+				throw;
+			}
 
-		size_t cbBuffer = 4 * n*n;
-		cl::Buffer currbuf(context, CL_MEM_READ_WRITE, cbBuffer, NULL);
-		cl::Buffer nextbuf(context, CL_MEM_READ_WRITE, cbBuffer, NULL);
+			size_t cbBuffer = 4 * n*n;
+			cl::Buffer currbuf(context, CL_MEM_READ_WRITE, cbBuffer, NULL);
+			cl::Buffer nextbuf(context, CL_MEM_READ_WRITE, cbBuffer, NULL);
 
-		cl::CommandQueue queue(context, device);
+			cl::CommandQueue queue(context, device);
 
-		std::vector<int> state_int(state.begin(), state.end());
+			std::vector<int> state_int(state.begin(), state.end());
 
-		queue.enqueueWriteBuffer(currbuf, CL_TRUE, 0, cbBuffer, &state_int[0]);
+			queue.enqueueWriteBuffer(currbuf, CL_TRUE, 0, cbBuffer, &state_int[0]);
 
-		cl::NDRange offset(0, 0);               // Always start iterations at x=0, y=0
-		cl::NDRange globalSize(n, n);   // Global size must match the original loops
-		cl::NDRange localSize = cl::NullRange;    // We don't care about local size
+			cl::NDRange offset(0, 0);               // Always start iterations at x=0, y=0
+			cl::NDRange globalSize(n, n);   // Global size must match the original loops
+			cl::NDRange localSize = cl::NullRange;    // We don't care about local size
 
-		cl::Kernel kernel_updateCL(program, "update_cl");
-
-
+			cl::Kernel kernel_updateCL(program, "update_cl");
 
 
 
-		for (unsigned i = 0; i < input->steps; i++){
+			for (unsigned i = 0; i < input->steps; i++){
 
-			if (opencl_flag == 1){
+
 				log->LogVerbose("OpenCL: Starting iteration %d of %d\n", i, input->steps);
 				kernel_updateCL.setArg(0, currbuf);
 				kernel_updateCL.setArg(1, nextbuf);
@@ -269,8 +268,33 @@ public:
 				queue.enqueueBarrier();
 
 				std::swap(currbuf, nextbuf);
+				// The weird form of log is so that there is little overhead
+				// if logging is disabled
+				log->Log(puzzler::Log_Debug, [&](std::ostream &dst){
+					dst << "\n";
+					for (unsigned y = 0; y < n; y++){
+						for (unsigned x = 0; x < n; x++){
+							dst << (state[y*n + x] ? 'x' : ' ');
+						}
+						dst << "\n";
+					}
+				});
 			}
-			else {
+			log->LogVerbose("Finished steps");
+
+			if (opencl_flag == 1) {
+				queue.enqueueReadBuffer(currbuf, CL_TRUE, 0, cbBuffer, &state_int[0]);
+
+
+				for (unsigned i = 0; i < n*n; i++){
+					state[i] = (bool)state_int[i];
+				}
+			}
+
+			output->state = state;
+		}
+		else{
+			for (unsigned i = 0; i < input->steps; i++){
 				fprintf(stderr, "Launching TBB \n");
 				log->LogVerbose("TBB: Starting iteration %d of %d\n", i, input->steps);
 
@@ -288,38 +312,23 @@ public:
 				tbb::parallel_for(tbb::blocked_range2d<unsigned>(0, n, K, 0, n, K), f, tbb::simple_partitioner());
 				state = next;
 
-			}
 
 
-
-			// The weird form of log is so that there is little overhead
-			// if logging is disabled
-			log->Log(puzzler::Log_Debug, [&](std::ostream &dst){
-				dst << "\n";
-				for (unsigned y = 0; y < n; y++){
-					for (unsigned x = 0; x < n; x++){
-						dst << (state[y*n + x] ? 'x' : ' ');
-					}
+				// The weird form of log is so that there is little overhead
+				// if logging is disabled
+				log->Log(puzzler::Log_Debug, [&](std::ostream &dst){
 					dst << "\n";
-				}
-			});
-		}
-
-
-
-		log->LogVerbose("Finished steps");
-
-		if (opencl_flag == 1) {
-			queue.enqueueReadBuffer(currbuf, CL_TRUE, 0, cbBuffer, &state_int[0]);
-
-
-			for (unsigned i = 0; i < n*n; i++){
-				state[i] = (bool)state_int[i];
+					for (unsigned y = 0; y < n; y++){
+						for (unsigned x = 0; x < n; x++){
+							dst << (state[y*n + x] ? 'x' : ' ');
+						}
+						dst << "\n";
+					}
+				});
 			}
+			log->LogVerbose("Finished steps");
+			output->state = state;
 		}
-
-		output->state = state;
-
 	}
 
 
