@@ -1,5 +1,6 @@
 #!/bin/bash
 testvar="1 2 3 4 8 16 32 64 128 1024 4096 16000"
+echo "Running median_bits"
 for i in $testvar; do
 	./bin/run_puzzle median_bits $i 2 2>> median_bits.log
 done
@@ -38,6 +39,7 @@ for i in $testvar; do
 	#echo "Reference time = '${
 done
 ###############
+echo "Running life"
 for i in $testvar; do
 	./bin/run_puzzle life $i 2 2>> life.log
 done
@@ -58,6 +60,7 @@ for i in $testvar; do
 done
 
 ###############
+echo "Running matrix_exponent"
 for i in $testvar; do
 	./bin/run_puzzle matrix_exponent $i 2 2>> matrix_exponent.log
 done
@@ -79,6 +82,7 @@ done
 
 
 ###############
+echo "Running option_explicit"
 for i in $testvar; do
 	./bin/run_puzzle option_explicit $i 2 2>> option_explicit.log
 done
@@ -100,6 +104,7 @@ done
 
 
 ###############
+echo "Running string_search"
 for i in $testvar; do
 	./bin/run_puzzle string_search $i 2 2>> string_search.log
 done
