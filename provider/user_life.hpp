@@ -171,53 +171,53 @@ public:
 				dst << "\n";
 			}
 		});
-		fprintf(stderr, "Initialising OpenCL... \n");
+		fprintf(stderr, "About to read Env Variable \n");
 		//Initialise OpenCL
 		//Choosing TBB or OpenCL
 		int opencl_flag = 0;
 		if (getenv("HPCE_SELECT_OPENCL")){
 			opencl_flag = atoi(getenv("HPCE_SELECT_OPENCL"));
 		}
+		if (opencl_flag == 1){
+			fprintf(stderr, "OpenCL env variable got. opencl_flag = %d \n", opencl_flag);
+			std::vector<cl::Platform> platforms;
 
-		fprintf(stderr, "OpenCL env variable got. opencl_flag = %d \n", opencl_flag);
-		std::vector<cl::Platform> platforms;
+			cl::Platform::get(&platforms);
+			if (platforms.size() == 0)
+				throw std::runtime_error("No OpenCL platforms found.");
 
-		cl::Platform::get(&platforms);
-		if (platforms.size() == 0)
-			throw std::runtime_error("No OpenCL platforms found.");
+			std::cerr << "Found " << platforms.size() << " platforms\n";
+			for (unsigned i = 0; i < platforms.size(); i++){
+				std::string vendor = platforms[i].getInfo<CL_PLATFORM_VENDOR>();
+				std::cerr << "  Platform " << i << " : " << vendor << "\n";
+			}
 
-		std::cerr << "Found " << platforms.size() << " platforms\n";
-		for (unsigned i = 0; i < platforms.size(); i++){
-			std::string vendor = platforms[i].getInfo<CL_PLATFORM_VENDOR>();
-			std::cerr << "  Platform " << i << " : " << vendor << "\n";
-		}
+			int selectedPlatform = 1;
+			if (getenv("HPCE_SELECT_PLATFORM")){
+				selectedPlatform = atoi(getenv("HPCE_SELECT_PLATFORM"));
+			}
+			std::cerr << "Choosing platform " << selectedPlatform << "\n";
+			cl::Platform platform = platforms.at(selectedPlatform);
 
-		int selectedPlatform = 1;
-		if (getenv("HPCE_SELECT_PLATFORM")){
-			selectedPlatform = atoi(getenv("HPCE_SELECT_PLATFORM"));
-		}
-		std::cerr << "Choosing platform " << selectedPlatform << "\n";
-		cl::Platform platform = platforms.at(selectedPlatform);
+			std::vector<cl::Device> devices;
+			platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
+			if (devices.size() == 0){
+				throw std::runtime_error("No opencl devices found.\n");
+			}
 
-		std::vector<cl::Device> devices;
-		platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
-		if (devices.size() == 0){
-			throw std::runtime_error("No opencl devices found.\n");
-		}
+			std::cerr << "Found " << devices.size() << " devices\n";
+			for (unsigned i = 0; i < devices.size(); i++){
+				std::string name = devices[i].getInfo<CL_DEVICE_NAME>();
+				std::cerr << "  Device " << i << " : " << name << "\n";
+			}
 
-		std::cerr << "Found " << devices.size() << " devices\n";
-		for (unsigned i = 0; i < devices.size(); i++){
-			std::string name = devices[i].getInfo<CL_DEVICE_NAME>();
-			std::cerr << "  Device " << i << " : " << name << "\n";
-		}
+			fprintf(stderr, "OpenCL devices set up \n");
 
-		fprintf(stderr, "OpenCL devices set up \n");
+			int selectedDevice = 0;
+			if (getenv("HPCE_SELECT_DEVICE")){
+				selectedDevice = atoi(getenv("HPCE_SELECT_DEVICE"));
+			}
 
-		int selectedDevice = 0;
-		if (getenv("HPCE_SELECT_DEVICE")){
-			selectedDevice = atoi(getenv("HPCE_SELECT_DEVICE"));
-		}
-		if (selectedDevice == 1){
 			std::cerr << "Choosing device " << selectedDevice << "\n";
 			cl::Device device = devices.at(selectedDevice);
 
