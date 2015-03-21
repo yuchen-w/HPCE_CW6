@@ -4,12 +4,12 @@ CPPFLAGS += -I /usr/include -I /usr/lib
 TBB_DIR = usr/
 tbbCPPFLAGS += -I $(TBB_INC_DIR) -I $(shell pwd)/src
 tbbLDFLAGS += -L $(TBB_LIB_DIR)
+# Use -lm to bring in unix math library, -ltbb to bring in tbb
 tbbLDLIBS = -lm -ltbb
 
 XLINKER += -Xlinker -rpath -Xlinker $(TBB_LIB_DIR)
 LDFLAGS = 
-# Use -lm to bring in unix math library, -ltbb to bring in tbb
-LDLIBS = -lm
+LDLIBS =
 
 # Turn on optimisations
 CPPFLAGS += -O2
@@ -23,6 +23,6 @@ lib/libpuzzler.a : provider/*.cpp provider/*.hpp
 
 bin/% : src/%.cpp lib/libpuzzler.a
 	-mkdir -p bin
-	$(CXX) $(CPPFLAGS) -o $@ $^ $(XLINKER) $(tbbLDFLAGS) $(tbbLDLIBS) $(LDFLAGS) $(LDLIBS) -Llib -lpuzzler
+	$(CXX) $(CPPFLAGS) -o $@ $^ $(XLINKER) $(tbbLDFLAGS) $(tbbLDLIBS) -lpuzzler
 
 all : bin/test_opencl bin/execute_puzzle bin/create_puzzle_input bin/run_puzzle bin/compare_puzzle_output
