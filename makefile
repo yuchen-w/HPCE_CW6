@@ -18,6 +18,12 @@ tbbLDFLAGS += -L $(TBB_LIB_DIR)
 XLINKER += -Xlinker -rpath -Xlinker $(TBB_LIB_DIR)
 
 
+
+
+bin/test_opencl : src/test_opencl.cpp
+	-mkdir -p bin
+	$(CXX) $(CPPFLAGS) $(OPENCL_INCLUDES) $^ -o $@ $(LDFLAGS) $(OPENCL_LIBS)
+
 lib/libpuzzler.a : provider/*.cpp provider/*.hpp
 	cd provider && $(MAKE) all
 
