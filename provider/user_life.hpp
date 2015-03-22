@@ -152,7 +152,7 @@ public:
 			opencl_flag = atoi(getenv("HPCE_SELECT_OPENCL"));
 		}*/
 
-		if (n < 512){
+		if (n < 256){
 			opencl_flag = 0;
 		}
 		else {
