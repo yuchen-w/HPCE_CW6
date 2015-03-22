@@ -82,8 +82,9 @@ At the end of the for loop, there was a copy of `tmp` into `state`. This was spe
 std::swap(state, tmp);	//state = tmp;
 ```
 #####Effect of our approach to improve performance
-Testing was done and here's the graph
+![image](http://i.imgur.com/PRyWZZB.png)
 
+The graph above shows that the TBB code performs consistently better than the original sequential code. The speed up achieved is up to 2.9x for `n` = 131072.
 
 ###String_search
 It was deemed too difficult to speed up `string_search` because of the dependencies between the loops. The pseudo code of the operation is as follows:
