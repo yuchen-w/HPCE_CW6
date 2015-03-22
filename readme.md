@@ -28,7 +28,10 @@ For OpenCL, the implementation was a bit more tricky since `bool` variables cann
 
 Testing was done and above is the graph of the duration it took for different techniques. It shows that for `n`<512, it runs quickest on TBB and for above, and any higher `n` will call OpenCL.
 
+The updated code runs like this:
+![image](http://i.imgur.com/0KwlENp.png)
 
+At `n`=1024, the performance speed up was around 128x, and at `n`=2048, it reaches around 196x speedup.
 
 ###Matrix_exponent
 The function that took most time was `MatrixMul()` since it contains 3 loops, each over `n` iterations. The operation within `MatrixMul()` does contain any dependencies, providing scope for parallelising the operations. 
