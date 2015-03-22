@@ -190,7 +190,7 @@ public:
 				std::cerr << "  Platform " << i << " : " << vendor << "\n";
 			}
 
-			int selectedPlatform = 1;
+			int selectedPlatform = 0;
 			if (getenv("HPCE_SELECT_PLATFORM")){
 				selectedPlatform = atoi(getenv("HPCE_SELECT_PLATFORM"));
 			}

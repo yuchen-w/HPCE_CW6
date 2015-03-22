@@ -6,13 +6,17 @@ LDLIBS = -lm -ltbb
 CPPFLAGS += -O2
 
 #OpenCL
-CPPFLAGS += -I include -I opencl_sdk/include -L opencl_sdk/lib/cygwin/x86_64 
+CPPFLAGS += -I include -I opencl_sdk/include 
 LDLIBS += -lOpenCL
 
 #TBB
-TBB_DIR = usr/
-TBB_INC_DIR = /usr/include
-TBB_LIB_DIR = /usr/lib
+TBB_DIR = /usr
+TBB_INC_DIR = $(TBB_DIR)/include
+TBB_LIB_DIR = $(TBB_DIR)/lib
+
+#TBB_DIR = C:/HPCE/tbb
+#TBB_INC_DIR = $(TBB_DIR)/include
+##TBB_LIB_DIR = $(TBB_DIR)/lib/intel64/gcc4.4
 
 CPPFLAGS += -I $(TBB_INC_DIR) -I $(shell pwd)/src
 LDFLAGS += -L $(TBB_LIB_DIR)
