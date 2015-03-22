@@ -286,15 +286,28 @@ public:
 				else 
 					 K = n;
 
-				auto f = [&](const tbb::blocked_range2d<unsigned> &chunk) {
-					for (unsigned x = chunk.rows().begin(); x < chunk.rows().end(); x++){
-						for (unsigned y = chunk.cols().begin(); y < chunk.cols().end(); y++){
+				// auto f = [&](const tbb::blocked_range2d<unsigned> &chunk) {
+				// 	for (unsigned x = chunk.rows().begin(); x < chunk.rows().end(); x++){
+				// 		for (unsigned y = chunk.cols().begin(); y < chunk.cols().end(); y++){
+				// 			next[y*n + x] = update_unroll(n, state, x, y);
+				// 		}
+				// 	}
+				// };
+				// tbb::parallel_for(tbb::blocked_range2d<unsigned>(0, n, n , 0, n, 100), f, tbb::simple_partitioner());
+				
+				
+
+				for (unsigned x =0; x<n; x++){
+
+					auto f = [&](const tbb::blocked_range<unsigned> &chunk) {
+						for (unsigned y = chunk.begin(); y < chunk.end(); y++){
 							next[y*n + x] = update_unroll(n, state, x, y);
 						}
-					}
-				};
-				tbb::parallel_for(tbb::blocked_range2d<unsigned>(0, n, n , 0, n, 100), f, tbb::simple_partitioner());
-				
+					};
+
+					tbb::parallel_for(tbb::blocked_range<unsigned>(0, n, K), f, tbb::simple_partitioner());
+
+				}
 				// for(unsigned x=0; x<n; x++){
           // for(unsigned y=0; y<n; y++){
             // next[y*n+x]=update_unroll(n, state, x, y);
