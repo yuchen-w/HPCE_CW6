@@ -45,7 +45,7 @@ private:
 	{
 		std::vector<uint32_t> res(n*n, 0);
 
-		unsigned K = 10;
+		unsigned K = 32;
 
 		auto f = [&](const tbb::blocked_range2d<unsigned> &chunk) {
 			for (unsigned r = chunk.rows().begin(); r !=chunk.rows().end(); r++){
@@ -80,13 +80,16 @@ public:
 	  hash[0] = acc[0];
 
 	  //Choosing TBB or OpenCL
-	  int opencl_flag = 0;
+	  /*int opencl_flag = 0;
 	  if (getenv("HPCE_SELECT_OPENCL")){
 		  opencl_flag = atoi(getenv("HPCE_SELECT_OPENCL"));
-	  }
+	  }*/
 
-	  if (opencl_flag == 0){
-		  for (unsigned i = 1; i<input->steps; i++){
+	  if (input->n < 32) {
+		  return ReferenceExecute(log, input, output);
+	  }
+	  else if (input->n <= 64) {
+		  for (unsigned i = 1; i < input->steps; i++){
 			  log->LogDebug("TBB: Iteration %d", i);
 			  acc = MatrixMul_tbb(input->n, acc, A);
 			  hash[i] = acc[0];
