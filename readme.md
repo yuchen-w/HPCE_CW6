@@ -10,7 +10,7 @@ TBB was used to optimise these functions in the first instance.
 Some functions that looked like they could be improved with OpenCL were implemented in OpenCL.
 
 ###Life
-Within the `update` function, the 2 `for` loops for `dx` and `dy` only operates the function 9 times. By manually expand the operation to eliminate the need of this `for` loop, performance is increased. [Perhaps check this - just call the different .cl file for openCL, tbbto call update_unroll.
+Within the `update` function, the 2 `for` loops for `dx` and `dy` only operates the function 9 times. By manually expand the operation to eliminate the need of this `for` loop, performance is increased.
 
 The duration taken for the script to execute was measured with an example of `n`=100 and the results are as follows:
 
@@ -41,11 +41,33 @@ Testing is done and here's the graph
 ###Median_bits
 The part of the code that took the bulk of the execution time was the double for loops. The operations were parallelised using `tbb:blocked_range2d` to parallelise the function across available CPU cores. Some tests were conducted to provide the best chunk range to use.
 
+#####Approach to improve performance
+Testing is done and here's the graph
+
 ###Option_explicit
 option_explicit
 
 ###String_search
-string_search
+It was deemed that it is difficult to speed up `string_search` because of the dependencies between the loops. The pseudo code of the operation is at follows:
+
+```
+for each character (i from 0)
+  for each pattern (p from 0)
+  
+    check if there is a match
+    
+    if there is a match
+      increment the counter (histogram)
+      increment i to the end of the matched string
+    end
+  end
+end
+```
+
+When there is a match, the `i` increment not only avoids the same string being matched again (bearing in mind the wildcard `.` in the search term), but it also forbiddens other patterns further down the `input->pattern` array in the same region. This makes it difficult to parallel the operation without picking up the false alarms. 
+
+
+
 
 ###Circuit_sim
 With the help of Visual Studio's profiler, we can see that the function `next` was taking up the most execution time. Both `tbb::task_group` and `tbb::parfor` were trialed to optimise the operation of the program.
