@@ -16,8 +16,8 @@ The duration taken for the script to execute was measured with an example of `n`
 
 | |With given code | With loop unrolled|
 |------------- |------------- | ------------- |
-|TBB|17.44| 16.38
-|OpenCL| 0.33|0.34
+|TBB|17.44s| 16.38s
+|OpenCL| 0.33s|0.34s
 
 The unrolled loop provide a minor improvement for TBB and about the same performance for OpenCL. It is assummed that OpenCL operations are so quick anyway that those 2 short `for` loops will not provide much improvement in actual time. 
 
