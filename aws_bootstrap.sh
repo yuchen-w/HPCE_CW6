@@ -1,6 +1,6 @@
 #!/bin/bash
 sudo apt-get update
-sudo apt-get -y install g++
-sudo apt-get -y install git
-sudo apt-get -y install libtbb-dev
-sudo apt-get -y install bc
+sudo apt-get --yes --force-yes install g++
+sudo apt-get --yes --force-yes install git
+sudo apt-get --yes --force-yes install libtbb-dev
+sudo apt-get --yes --force-yes install bc
