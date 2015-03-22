@@ -23,8 +23,8 @@ For TBB, the calling of update is parallelised since it loops `n`*`n` times, the
 
 For OpenCL, the implementation is a bit more tricky since `bool` variables cannot be used as a kernal variable. Hence the vector `state` is turned into a `int` vector for kernel operations. It is also noted that `.at` is a C++ function, so it is replaced to simply calling the vector index directly.
 
-#####Approach to improve performance
-Testing is done and here's the graph
+#####Effect of our approach to improve performance
+Testing was done and here's the graph
 
 
 ###Matrix_exponent
@@ -32,14 +32,15 @@ The function that took most time is `MatrixMul` since it contains 3 loops, each 
 
 For TBB, a new function `MatrixMul_tbb` is created and once again, the library `tbb::parallel_for` with a `tbb::blocked_range2d` is used. For OpenCL, a kernel `MatrixMul` is created to perform the same function. 
 
-#####Approach to improve performance
-Testing is done and here's the graph
+#####Effect of our approach to improve performance
+Testing was done and here's the graph
 
 
 ###Median_bits
 The part of the code that took the bulk of the execution time was the double for loops inside the implementation of `Execute()`. The operations were parallelised using `tbb:blocked_range2d` to parallelise the function across available CPU cores. Some tests were conducted to provide the best chunk range to use.
 
-#####Approach to improve performance
+#####Effect of our approach to improve performance
+Testing was done and here's the graph
 ![image](http://i.imgur.com/TASMYz5.png)
 
 ###Option_explicit
@@ -77,7 +78,8 @@ At the end of the for loop, there is a copy of `tmp` into `state`. This was sped
 ```
 std::swap(state, tmp);	//state = tmp;
 ```
-
+#####Effect of our approach to improve performance
+Testing was done and here's the graph
 ###String_search
 It was deemed that it is difficult to speed up `string_search` because of the dependencies between the loops. The pseudo code of the operation is at follows:
 
@@ -139,6 +141,8 @@ With the help of Visual Studio's profiler, we found that the function `next` was
 `tbb::parfor` was utilised to parallelise the for loop in `next`. This was found to have sped up the performance of the program on AWS.
 
 Some issues were encountered using `tbb::parfor` because of the type of data that was used (`vector<bool>`). This was remedied by converting the data while it was being operated on into `vector<char>` and creating overloaded functions which would operate on this type of data. `vector<char>` was selected as it was the next smallest array for storing data after `vector<bool>`
+#####Effect of our approach to improve performance
+Testing was done and here's the graph
 
 Testing Methodology
 -------------------
