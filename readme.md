@@ -73,8 +73,8 @@ As illustrated in the diagram above, the blocks represent the matches and only t
 One of the ideas to speed up the puzzle is to parallellise the matching process and record the `offset`, `pattern` and `len` information of each match, then eliminate the false alarms from the results. The following algorithm is proposed:
 
 ```
-parfor each character (i from 0)
-  for each pattern (p from 0)
+parfor each pattern (p from 0)
+  for each character (i from 0)
   
     check if there is a match
     
