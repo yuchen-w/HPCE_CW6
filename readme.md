@@ -37,6 +37,8 @@ For TBB, a new function `MatrixMul_tbb()` was created and once again, the librar
 
 Note that there is the result for the orignal code at `n` = 32 is not shown since the duration was given as 0s from testing. The graph shows that for `n`<32, the puzzle should run the original script (i.e. `ReferenceExecute`); for `n` between 32 and 64, the TBB code should be run and above that, the OpenCL code should be called.
 
+The following timing graph shows the processing time after the above techniques are applied - and it is as expected.
+![image](http://i.imgur.com/P6DUk69.png)
 
 ###Median_bits
 The part of the code that took the bulk of the execution time was the double for loops inside the implementation of `Execute()`. The operations were parallelised using `tbb:blocked_range2d` to parallelise the function across available CPU cores. Some tests were conducted to provide the best chunk range to use.
