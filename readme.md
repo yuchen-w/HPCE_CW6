@@ -39,7 +39,7 @@ Testing is done and here's the graph
 
 
 ###Median_bits
-median_bits
+The part of the code that took the bulk of the execution time was the double for loops. The operations were parallelised using `tbb:blocked_range2d` to parallelise the function across available CPU cores. Some tests were conducted to provide the best chunk range to use.
 
 ###Option_explicit
 option_explicit
