@@ -66,8 +66,39 @@ end
 
 When there is a match, the `i` increment not only avoids the same string being matched again (bearing in mind the wildcard `.` in the search term), but it also forbiddens other patterns further down the `input->pattern` array in the same region. This makes it difficult to parallel the operation without picking up the false alarms. 
 
+![image](http://i.imgur.com/IGuOmdY.png)
 
+As illustrated in the diagram above, the blocks represent the matches and only the green ones will be recorded based on the algorithm above. 
 
+One of the ideas to speed up the puzzle is to parallellise the matching process and record the `offset`, `pattern` and `len` information of each match, then eliminate the false alarms from the results. The following algorithm is proposed:
+
+```
+parfor each character (i from 0)
+  for each pattern (p from 0)
+  
+    check if there is a match
+    
+    if there is a match
+      record the matched pattern, offset and length of match
+      increment 1 to the ith position in a vector (offset_histogram). This vector records the number of matches in each offset - this helps to deal with duplicates and false alarms.
+    end
+  end
+end
+
+Set up a vector sized number of matches and initlise values to 1. This acts as an flag for whether the match is a false alarm or not. 
+
+for each value of offset_histogram
+  if the value is bigger than 1
+    check the pattern of each entry and apart from the entry with the smallest pattern number, change the flags to zero.
+  end
+end
+
+for each match
+  check for the offset and length, and select the matches to keep as appropriate
+end
+```
+
+Athough the potential speedup of the matching can be significant, the resultant sorting can only be done sequentially and this involves two `for` loops. Since the original code actually computes relatively fast anyway, it was deemed that the new algorithm might actually lengthen the computation so this was not attempted any further.
 
 ###Circuit_sim
 With the help of Visual Studio's profiler, we can see that the function `next` was taking up the most execution time. Both `tbb::task_group` and `tbb::parfor` were trialed to optimise the operation of the program.
