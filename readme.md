@@ -1,16 +1,14 @@
 HPCE 2014 CW6
 =============
-Approach to improve performance
+The General approach
 -------------------------------
 Code was ran with the Visual Studio's Performance Profiler over a few minutes to identify key functions which were taking the most exectuion time:
 ![image](https://cloud.githubusercontent.com/assets/3355737/6650373/a8bd3e5e-ca06-11e4-9048-fa2f345940ef.png)
 
-TBB was used to optimise these functions in the first instance.
-
-Some functions that looked like they could be improved with OpenCL were implemented in OpenCL.
+TBB was used to optimise these functions in the first instance. OpenCL was used to further improve the performance of some functions which were contained many loops of calculations which could benefit from more processing cores.
 
 ###Life
-Within the `update` function, the 2 `for` loops for `dx` and `dy` only operates the function 9 times. By manually expand the operation to eliminate the need of this `for` loop, performance is increased.
+Within the `update` function, the 2 `for` loops for `dx` and `dy` only operates the function 9 times. By manually expand the operation to eliminate the need of this `for` loop, performance can be increased.
 
 The duration taken for the script to execute was measured with an example of `n`=100 and the results are as follows:
 
@@ -19,36 +17,71 @@ The duration taken for the script to execute was measured with an example of `n`
 |TBB|17.44s| 16.38s
 |OpenCL| 0.33s|0.34s
 
-The unrolled loop provide a minor improvement for TBB and about the same performance for OpenCL. It is assummed that OpenCL operations are so quick anyway that those 2 short `for` loops will not provide much improvement in actual time. 
+The unrolled loop provide a minor improvement for TBB and about the same performance for OpenCL. It was assummed that OpenCL operations are so quick anyway that those 2 short `for` loops will not provide much improvement in actual time. 
 
-For TBB, the calling of update is parallelised since it loops `n`*`n` times, the library `tbb::parallel_for` with a `tbb::blocked_range2d` is used.
+For TBB, the calling of update was parallelised since it loops `n`*`n` times, the library `tbb::parallel_for` with a `tbb::blocked_range2d` was used.
 
-For OpenCL, the implementation is a bit more tricky since `bool` variables cannot be used as a kernal variable. Hence the vector `state` is turned into a `int` vector for kernel operations. It is also noted that `.at` is a C++ function, so it is replaced to simply calling the vector index directly.
+For OpenCL, the implementation was a bit more tricky since `bool` variables cannot be used as a kernal variable. Hence the vector `std::vector<bool>state` was converted to a `std::vector<int>` vector for kernel operations. It should also noted that `std::vector.at()` is a C++ function, so it was replaced to simply accessing the vector elements directly by their index.
 
-#####Approach to improve performance
-Testing is done and here's the graph
+#####Effect of our approach to improve performance
+Testing was done and here's the graph
 
 
 ###Matrix_exponent
-The function that took most time is `MatrixMul` since it contains 3 loops, each over `n` iterations. The operation within `MatrixMul` does not have any dependencies, providing scope to parallel the operations. 
+The function that took most time was `MatrixMul()` since it contains 3 loops, each over `n` iterations. The operation within `MatrixMul()` does contain any dependencies, providing scope for parallelising the operations. 
 
-For TBB, a new function `MatrixMul_tbb` is created and once again, the library `tbb::parallel_for` with a `tbb::blocked_range2d` is used. For OpenCL, a kernel `MatrixMul` is created to perform the same function. 
+For TBB, a new function `MatrixMul_tbb()` was created and once again, the library `tbb::parallel_for` with a `tbb::blocked_range2d` was used. For OpenCL, a kernel `MatrixMul` was created to perform the same function. 
 
-#####Approach to improve performance
-Testing is done and here's the graph
+#####Effect of our approach to improve performance
+Testing was done and here's the graph
 
 
 ###Median_bits
-The part of the code that took the bulk of the execution time was the double for loops. The operations were parallelised using `tbb:blocked_range2d` to parallelise the function across available CPU cores. Some tests were conducted to provide the best chunk range to use.
+The part of the code that took the bulk of the execution time was the double for loops inside the implementation of `Execute()`. The operations were parallelised using `tbb:blocked_range2d` to parallelise the function across available CPU cores. Some tests were conducted to provide the best chunk range to use.
 
-#####Approach to improve performance
-Testing is done and here's the graph
+#####Effect of our approach to improve performance
+Testing was done and here's the graph
+![image](http://i.imgur.com/TASMYz5.png)
 
 ###Option_explicit
-option_explicit
+Similar to `median_bits`, the implementation of `execution()` had multiple for loops which could have been optimised.
+Two of the `for` loops in the code had a variables vU and vD which depended on the value calculated on the previous iteration:
+```
+vU = vU*u;
+vD = vD*d;
+```
+With knowledge of the `for` loop's iteration, we can calculate the value of `vU` by using:
+```
+vU = input->S0*std::pow(u, (i));
+```
+With `std::pow()` a relatively computationally expensive function compared to multiply, the program can be sped up further with vU only calculated at the start of each TBB `tbb::parfor` chunk:
 
+```
+auto f2 = [&](const my_range_t &chunk2){	
+  double vU = input->S0*std::pow(u, (chunk2.begin()));	//This is expensive, do it outside of the i loop
+  double vD = input->S0*std::pow(d, (chunk2.begin()));
+  for (unsigned i = chunk2.begin(); i != chunk2.end(); i++){
+	  double vCU = wU*state[n + i + 1] + wM*state[n + i] + wD*state[n + i - 1];	
+	  double vCD = wU*state[n - i + 1] + wM*state[n - i] + wD*state[n - i - 1];
+	  vCU = (std::max)(vCU, vU - input->K);	//vU depends on the previous iteration's result for vU
+	  vCD = (std::max)(vCD, vD - input->K);
+	  tmp[n + i] = vCU;
+	  tmp[n - i] = vCD;
+	  vU = vU*u;
+	  vD = vD*d;
+  }
+};
+tbb::parallel_for(range2, f2, tbb::simple_partitioner());
+```
+
+At the end of the for loop, there was a copy of `tmp` into `state`. This was sped up by swapping the pointers of `tmp` and `state` with 
+```
+std::swap(state, tmp);	//state = tmp;
+```
+#####Effect of our approach to improve performance
+Testing was done and here's the graph
 ###String_search
-It was deemed that it is difficult to speed up `string_search` because of the dependencies between the loops. The pseudo code of the operation is at follows:
+It was deemed too difficult to speed up `string_search` because of the dependencies between the loops. The pseudo code of the operation is as follows:
 
 ```
 for each character (i from 0)
@@ -101,34 +134,33 @@ end
 Athough the potential speedup of the matching can be significant, the resultant sorting can only be done sequentially and this involves two `for` loops. Since the original code actually computes relatively fast anyway, it was deemed that the new algorithm might actually lengthen the computation so this was not attempted any further.
 
 ###Circuit_sim
-With the help of Visual Studio's profiler, we can see that the function `next` was taking up the most execution time. Both `tbb::task_group` and `tbb::parfor` were trialed to optimise the operation of the program.
+With the help of Visual Studio's profiler, we found that the function `next` was taking up the most execution time. To optimise `next` we created function `next_tbb` to optimise the implementation of the function. Both `tbb::task_group` and `tbb::parfor` were trialed to optimise the operation of the program. 
 
-However, it was found that `tbb::task_group` actually significantly slowed down the operation of the program, so this was not utilised in the code. Some issues were encountered using `tbb::parfor` because of the type of data that was used (`vector<bool>`). This was remedied by converting the data while it was being operated on into `vector<char>` and creating overloaded functions which would operate on this type of data. `vector<char>` was selected as it was the next smallest array for storing data after `vector<bool>`
+`tbb::task_group` was attempted to be used in the `calcSrc` function which is called in a `for` loop inside the function `next`. However, it was found that `tbb::task_group` actually significantly slowed down the operation of the program, so this was not utilised in the code. 
+
+`tbb::parfor` was utilised to parallelise the for loop in `next`. This was found to have sped up the performance of the program on AWS.
+
+Some issues were encountered using `tbb::parfor` because of the type of data that was used (`vector<bool>`). This was remedied by converting the data while it was being operated on into `vector<char>` and creating overloaded functions which would operate on this type of data. `vector<char>` was selected as it was the next smallest array for storing data after `vector<bool>`
+#####Effect of our approach to improve performance
+Testing was done and here's the graph
 
 Testing Methodology
 -------------------
+The code was tested on AWS over a range of values using the bash test script `test.sh`. Typically, the test values would be:
+```
+testvar="1 2 3 4 8 16 32 64 128 1024 2048 4096 8096"
+```
+The script would use `bc` to calculate the time in bash and output this in the following fashion:
+![image](https://cloud.githubusercontent.com/assets/3355737/6770097/768a1eb8-d0ad-11e4-8cce-c0cc638ec35e.png)
 
+The data from this script was used to analyse the data and decide
 Work division
 -------------
+Both of us sat down to analyse the different puzzles and the coding of puzzles are assigned to each person:
+Yuchen - circuit_sim (TBB), option_explicit(TBB), median_bits (TBB)
+Michael -  life (TBB and OpenCL), matrix_exponent (TBB and OpenCL), string search (attempt)
 
-TBB:
-
-- life optimisations: Michael
-- matrix exponent optimisations: Michael
-
-- circuit_sim optimisations: Yuchen
-- option_explicit optimisations: Yuchen
-
-OpenCL:
-- life optimisations: Michael
-
-Timings
--------
-Function  | Original | TBB | OpenCL| Fn args
-------------- | ------------- | ------------- | ------------- | -------------
-life.hpp  |  |  |  |
-circuit_sim| | | |![image](https://cloud.githubusercontent.com/assets/3355737/6678011/39207a2e-cc2d-11e4-8c4d-9296de56c130.png)
-Content Cell  |  |  |  |
+At the testing stage, Yuchen wrote the bash scripts to effectively capture the useful information from the log output. Michael analysed the data and suggests the best approach for solving the puzzles. 
 
 
 
