@@ -23,79 +23,79 @@ private:
 		int neighbours = 0;
 		int ox;
 		int oy;
-		////dx = -1, dy = -1
+		//dx = -1, dy = -1
 
-		//ox = (n + x - 1) % n; // handle wrap-around
-		//oy = (n + y - 1) % n;
+		ox = (n + x - 1) % n; // handle wrap-around
+		oy = (n + y - 1) % n;
 
-		//if (curr.at(oy*n + ox))
-		//	neighbours++;
+		if (curr.at(oy*n + ox))
+			neighbours++;
 
-		////dx = -1, dy = 0
-		//ox = (n + x - 1) % n; // handle wrap-around
-		//oy = (n + y) % n;
+		//dx = -1, dy = 0
+		ox = (n + x - 1) % n; // handle wrap-around
+		oy = (n + y) % n;
 
-		//if (curr.at(oy*n + ox))
-		//	neighbours++;
+		if (curr.at(oy*n + ox))
+			neighbours++;
 
-		////dx = -1, dy = 1
-		//ox = (n + x - 1) % n; // handle wrap-around
-		//oy = (n + y + 1) % n;
+		//dx = -1, dy = 1
+		ox = (n + x - 1) % n; // handle wrap-around
+		oy = (n + y + 1) % n;
 
-		//if (curr.at(oy*n + ox))
-		//	neighbours++;
+		if (curr.at(oy*n + ox))
+			neighbours++;
 
-		////dx = 0, dy = -1
-		//ox = (n + x) % n; // handle wrap-around
-		//oy = (n + y - 1) % n;
+		//dx = 0, dy = -1
+		ox = (n + x) % n; // handle wrap-around
+		oy = (n + y - 1) % n;
 
-		//if (curr.at(oy*n + ox))
-		//	neighbours++;
+		if (curr.at(oy*n + ox))
+			neighbours++;
 
-		////dx = 0, dy = 0
-		//ox = (n + x) % n; // handle wrap-around
-		//oy = (n + y) % n;
+		//dx = 0, dy = 0
+		ox = (n + x) % n; // handle wrap-around
+		oy = (n + y) % n;
 
-		////no if loop because !(dx == 0 && dy == 0) = 0
+		//no if loop because !(dx == 0 && dy == 0) = 0
 
-		////dx = 0, dy = 1
-		//ox = (n + x) % n; // handle wrap-around
-		//oy = (n + y + 1) % n;
+		//dx = 0, dy = 1
+		ox = (n + x) % n; // handle wrap-around
+		oy = (n + y + 1) % n;
 
-		//if (curr.at(oy*n + ox))
-		//	neighbours++;
+		if (curr.at(oy*n + ox))
+			neighbours++;
 
-		////dx = 1, dy = -1
+		//dx = 1, dy = -1
 
-		//ox = (n + x + 1) % n; // handle wrap-around
-		//oy = (n + y - 1) % n;
+		ox = (n + x + 1) % n; // handle wrap-around
+		oy = (n + y - 1) % n;
 
-		//if (curr.at(oy*n + ox))
-		//	neighbours++;
+		if (curr.at(oy*n + ox))
+			neighbours++;
 
-		////dx = 1, dy = 0
-		//ox = (n + x + 1) % n; // handle wrap-around
-		//oy = (n + y) % n;
+		//dx = 1, dy = 0
+		ox = (n + x + 1) % n; // handle wrap-around
+		oy = (n + y) % n;
 
-		//if (curr.at(oy*n + ox))
-		//	neighbours++;
+		if (curr.at(oy*n + ox))
+			neighbours++;
 
-		////dx = 1, dy = 1
-		//ox = (n + x + 1) % n; // handle wrap-around
-		//oy = (n + y + 1) % n;
+		//dx = 1, dy = 1
+		ox = (n + x + 1) % n; // handle wrap-around
+		oy = (n + y + 1) % n;
 
-		//if (curr.at(oy*n + ox))
-		//	neighbours++;
+		if (curr.at(oy*n + ox))
+			neighbours++;
 
-		for (int dx = -1; dx <= +1; dx++){
-			for (int dy = -1; dy <= +1; dy++){
-				int ox = (n + x + dx) % n; // handle wrap-around
-				int oy = (n + y + dy) % n;
+		// for (int dx = -1; dx <= +1; dx++){
+			// for (int dy = -1; dy <= +1; dy++){
+				// int ox = (n + x + dx) % n; // handle wrap-around
+				// int oy = (n + y + dy) % n;
 
-				if (curr[oy*n + ox] && !(dx == 0 && dy == 0))
-					neighbours++;
-			}
-		}
+				// if (curr.at(oy*n + ox) && !(dx == 0 && dy == 0))
+					// neighbours++;
+			// }
+		// }
 
 
 		if (curr[n*y + x]){
@@ -262,32 +262,44 @@ public:
 			}
 			log->LogVerbose("Finished steps");
 
-			if (opencl_flag == 1) {
-				queue.enqueueReadBuffer(currbuf, CL_TRUE, 0, cbBuffer, &state_int[0]);
+			
+			queue.enqueueReadBuffer(currbuf, CL_TRUE, 0, cbBuffer, &state_int[0]);
 
 
-				for (unsigned i = 0; i < n*n; i++){
-					state[i] = (bool)state_int[i];
-				}
+			for (unsigned i = 0; i < n*n; i++){
+				state[i] = (bool)state_int[i];
 			}
+			
 
 			output->state = state;
 		} else{
+			
 			for (unsigned i = 0; i < input->steps; i++){
 				log->LogVerbose("TBB: Starting iteration %d of %d\n", i, input->steps);
 
 				std::vector<bool> next(n*n);
 				//Parallelised next[]=
-				unsigned K = 10;
+				
+				unsigned K;
+				if (n%2 == 0)
+					 K = n/2;
+				else 
+					 K = n;
 
 				auto f = [&](const tbb::blocked_range2d<unsigned> &chunk) {
-					for (unsigned x = chunk.rows().begin(); x != chunk.rows().end(); x++){
-						for (unsigned y = chunk.cols().begin(); y != chunk.cols().end(); y++){
+					for (unsigned x = chunk.rows().begin(); x < chunk.rows().end(); x++){
+						for (unsigned y = chunk.cols().begin(); y < chunk.cols().end(); y++){
 							next[y*n + x] = update_unroll(n, state, x, y);
 						}
 					}
 				};
-				tbb::parallel_for(tbb::blocked_range2d<unsigned>(0, n, K, 0, n, K), f, tbb::simple_partitioner());
+				tbb::parallel_for(tbb::blocked_range2d<unsigned>(0, n, n , 0, n, 100), f, tbb::simple_partitioner());
+				
+				// for(unsigned x=0; x<n; x++){
+          // for(unsigned y=0; y<n; y++){
+            // next[y*n+x]=update_unroll(n, state, x, y);
+          // }
+        // }
 				state = next;
 
 
