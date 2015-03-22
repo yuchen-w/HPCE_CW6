@@ -24,8 +24,14 @@ For TBB, the calling of update was parallelised since it loops `n`*`n` times, th
 For OpenCL, the implementation was a bit more tricky since `bool` variables cannot be used as a kernal variable. Hence the vector `std::vector<bool>state` was converted to a `std::vector<int>` vector for kernel operations. It should also noted that `std::vector.at()` is a C++ function, so it was replaced to simply accessing the vector elements directly by their index.
 
 #####Effect of our approach to improve performance
-Testing was done and here's the graph
+![image](http://i.imgur.com/rk1iYIf.png)
 
+Testing was done and above is the graph of the duration it took for different techniques. It shows that for `n`<512, it runs quickest on TBB and for above, and any higher `n` will call OpenCL.
+
+The updated code runs like this:
+![image](http://i.imgur.com/0KwlENp.png)
+
+At `n`=1024, the performance speed up was around 128x, and at `n`=2048, it reaches around 196x speedup.
 
 ###Matrix_exponent
 The function that took most time was `MatrixMul()` since it contains 3 loops, each over `n` iterations. The operation within `MatrixMul()` does contain any dependencies, providing scope for parallelising the operations. 
@@ -37,6 +43,8 @@ For TBB, a new function `MatrixMul_tbb()` was created and once again, the librar
 
 Note that there is the result for the orignal code at `n` = 32 is not shown since the duration was given as 0s from testing. The graph shows that for `n`<32, the puzzle should run the original script (i.e. `ReferenceExecute`); for `n` between 32 and 64, the TBB code should be run and above that, the OpenCL code should be called.
 
+The following timing graph shows the processing time after the above techniques are applied - and it is as expected.
+![image](http://i.imgur.com/P6DUk69.png)
 
 ###Median_bits
 The part of the code that took the bulk of the execution time was the double for loops inside the implementation of `Execute()`. The operations were parallelised using `tbb:blocked_range2d` to parallelise the function across available CPU cores. Some tests were conducted to provide the best chunk range to use.
