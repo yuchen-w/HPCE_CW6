@@ -23,69 +23,79 @@ private:
 		int neighbours = 0;
 		int ox;
 		int oy;
-		//dx = -1, dy = -1
+		////dx = -1, dy = -1
 
-		ox = (n + x - 1) % n; // handle wrap-around
-		oy = (n + y - 1) % n;
+		//ox = (n + x - 1) % n; // handle wrap-around
+		//oy = (n + y - 1) % n;
 
-		if (curr.at(oy*n + ox))
-			neighbours++;
+		//if (curr.at(oy*n + ox))
+		//	neighbours++;
 
-		//dx = -1, dy = 0
-		ox = (n + x - 1) % n; // handle wrap-around
-		oy = (n + y) % n;
+		////dx = -1, dy = 0
+		//ox = (n + x - 1) % n; // handle wrap-around
+		//oy = (n + y) % n;
 
-		if (curr.at(oy*n + ox))
-			neighbours++;
+		//if (curr.at(oy*n + ox))
+		//	neighbours++;
 
-		//dx = -1, dy = 1
-		ox = (n + x - 1) % n; // handle wrap-around
-		oy = (n + y + 1) % n;
+		////dx = -1, dy = 1
+		//ox = (n + x - 1) % n; // handle wrap-around
+		//oy = (n + y + 1) % n;
 
-		if (curr.at(oy*n + ox))
-			neighbours++;
+		//if (curr.at(oy*n + ox))
+		//	neighbours++;
 
-		//dx = 0, dy = -1
-		ox = (n + x) % n; // handle wrap-around
-		oy = (n + y - 1) % n;
+		////dx = 0, dy = -1
+		//ox = (n + x) % n; // handle wrap-around
+		//oy = (n + y - 1) % n;
 
-		if (curr.at(oy*n + ox))
-			neighbours++;
+		//if (curr.at(oy*n + ox))
+		//	neighbours++;
 
-		//dx = 0, dy = 0
-		ox = (n + x) % n; // handle wrap-around
-		oy = (n + y) % n;
+		////dx = 0, dy = 0
+		//ox = (n + x) % n; // handle wrap-around
+		//oy = (n + y) % n;
 
-		//no if loop because !(dx == 0 && dy == 0) = 0
+		////no if loop because !(dx == 0 && dy == 0) = 0
 
-		//dx = 0, dy = 1
-		ox = (n + x) % n; // handle wrap-around
-		oy = (n + y + 1) % n;
+		////dx = 0, dy = 1
+		//ox = (n + x) % n; // handle wrap-around
+		//oy = (n + y + 1) % n;
 
-		if (curr.at(oy*n + ox))
-			neighbours++;
+		//if (curr.at(oy*n + ox))
+		//	neighbours++;
 
-		//dx = 1, dy = -1
+		////dx = 1, dy = -1
 
-		ox = (n + x + 1) % n; // handle wrap-around
-		oy = (n + y - 1) % n;
+		//ox = (n + x + 1) % n; // handle wrap-around
+		//oy = (n + y - 1) % n;
 
-		if (curr.at(oy*n + ox))
-			neighbours++;
+		//if (curr.at(oy*n + ox))
+		//	neighbours++;
 
-		//dx = 1, dy = 0
-		ox = (n + x + 1) % n; // handle wrap-around
-		oy = (n + y) % n;
+		////dx = 1, dy = 0
+		//ox = (n + x + 1) % n; // handle wrap-around
+		//oy = (n + y) % n;
 
-		if (curr.at(oy*n + ox))
-			neighbours++;
+		//if (curr.at(oy*n + ox))
+		//	neighbours++;
 
-		//dx = 1, dy = 1
-		ox = (n + x + 1) % n; // handle wrap-around
-		oy = (n + y + 1) % n;
+		////dx = 1, dy = 1
+		//ox = (n + x + 1) % n; // handle wrap-around
+		//oy = (n + y + 1) % n;
 
-		if (curr.at(oy*n + ox))
-			neighbours++;
+		//if (curr.at(oy*n + ox))
+		//	neighbours++;
+
+		for (int dx = -1; dx <= +1; dx++){
+			for (int dy = -1; dy <= +1; dy++){
+				int ox = (n + x + dx) % n; // handle wrap-around
+				int oy = (n + y + dy) % n;
+
+				if (curr[oy*n + ox] && !(dx == 0 && dy == 0))
+					neighbours++;
+			}
+		}
 
 
 		if (curr[n*y + x]){
@@ -262,8 +272,7 @@ public:
 			}
 
 			output->state = state;
-		}
-		else{
+		} else{
 			for (unsigned i = 0; i < input->steps; i++){
 				log->LogVerbose("TBB: Starting iteration %d of %d\n", i, input->steps);
 
