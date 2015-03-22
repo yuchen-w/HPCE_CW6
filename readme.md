@@ -40,7 +40,7 @@ Testing is done and here's the graph
 The part of the code that took the bulk of the execution time was the double for loops inside the implementation of `Execute()`. The operations were parallelised using `tbb:blocked_range2d` to parallelise the function across available CPU cores. Some tests were conducted to provide the best chunk range to use.
 
 #####Approach to improve performance
-Testing is done and here's the graph
+![image](http://i.imgur.com/TASMYz5.png)
 
 ###Option_explicit
 Similar to `median_bits`, the implementation of `execution()` had multiple for loops which could have been optimised.
@@ -115,27 +115,14 @@ Some issues were encountered using `tbb::parfor` because of the type of data tha
 Testing Methodology
 -------------------
 
+
 Work division
 -------------
+Both of us sat down to analyse the different puzzles and the coding of puzzles are assigned to each person:
+Yuchen - circuit_sim (TBB), option_explicit(TBB), median bits (TBB)
+Michael -  life (TBB and OpenCL), matrix_exponent (TBB and OpenCL), string search (attempt)
 
-TBB:
-
-- life optimisations: Michael
-- matrix exponent optimisations: Michael
-
-- circuit_sim optimisations: Yuchen
-- option_explicit optimisations: Yuchen
-
-OpenCL:
-- life optimisations: Michael
-
-Timings
--------
-Function  | Original | TBB | OpenCL| Fn args
-------------- | ------------- | ------------- | ------------- | -------------
-life.hpp  |  |  |  |
-circuit_sim| | | |![image](https://cloud.githubusercontent.com/assets/3355737/6678011/39207a2e-cc2d-11e4-8c4d-9296de56c130.png)
-Content Cell  |  |  |  |
+At the testing stage, Yuchen wrote the bash scripts to effectively capture the useful information from the log output. Michael analysed the data and suggests the best approach for solving the puzzles. 
 
 
 
