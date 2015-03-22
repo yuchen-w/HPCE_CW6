@@ -209,7 +209,6 @@ public:
 		
 		//convert state to state_char
 		std::vector<char> state_char(input->inputState.size());
-		std::vector<int> state_int(input->inputState.size());
 
 		for (unsigned i = 0; i < state_char.size(); i++)
 		{
