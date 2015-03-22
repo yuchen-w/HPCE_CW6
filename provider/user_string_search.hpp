@@ -26,7 +26,7 @@ public:
 				  log->Log(puzzler::Log_Debug, [&](std::ostream &dst){
 					  dst << "  Found " << input->patterns.at(p) << " at offset " << i << ", match=" << data.substr(i, len);
 				  });
-				  histogram[p]++;	//Q: What does this do?
+				  histogram[p]++;
 				  i += len - 1;
 				  break;
 			  }
