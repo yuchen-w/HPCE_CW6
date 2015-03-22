@@ -1,5 +1,5 @@
 #!/bin/bash
-testvar="1 2 3 4 8 16 32 64 128 1024 4096"
+testvar="1 2 3 4 8 16 32 64 128 256 512"
 rm matrix_exponent.log
 for i in $testvar; do
 	./bin/run_puzzle matrix_exponent $i 2 2>> matrix_exponent.log
