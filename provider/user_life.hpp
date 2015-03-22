@@ -87,17 +87,6 @@ private:
 		if (curr.at(oy*n + ox))
 			neighbours++;
 
-		// for (int dx = -1; dx <= +1; dx++){
-			// for (int dy = -1; dy <= +1; dy++){
-				// int ox = (n + x + dx) % n; // handle wrap-around
-				// int oy = (n + y + dy) % n;
-
-				// if (curr.at(oy*n + ox) && !(dx == 0 && dy == 0))
-					// neighbours++;
-			// }
-		// }
-
-
 		if (curr[n*y + x]){
 			// alive
 			if (neighbours<2){
@@ -144,7 +133,7 @@ public:
 				dst << "\n";
 			}
 		});
-		
+
 		//Choosing TBB or OpenCL
 		int opencl_flag = 0;
 
@@ -163,7 +152,7 @@ public:
 			cl::Platform::get(&platforms);
 			if (platforms.size() == 0)
 				throw std::runtime_error("No OpenCL platforms found.");
-			
+
 			std::cerr << "Found " << platforms.size() << " platforms\n";
 			for (unsigned i = 0; i < platforms.size(); i++){
 				std::string vendor = platforms[i].getInfo<CL_PLATFORM_VENDOR>();
@@ -233,9 +222,7 @@ public:
 			cl::Kernel kernel_updateCL(program, "update_cl");
 
 
-
 			for (unsigned i = 0; i < input->steps; i++){
-
 
 				log->LogVerbose("OpenCL: Starting iteration %d of %d\n", i, input->steps);
 				kernel_updateCL.setArg(0, currbuf);
@@ -258,49 +245,29 @@ public:
 			}
 			log->LogVerbose("Finished steps");
 
-			
 			queue.enqueueReadBuffer(currbuf, CL_TRUE, 0, cbBuffer, &state_int[0]);
 
-				for (unsigned i = 0; i < n*n; i++){
-					state[i] = (bool)state_int[i];
-				}		
+			for (unsigned i = 0; i < n*n; i++){
+				state[i] = (bool)state_int[i];
+			}
 
 			output->state = state;
-		} else{
-			
+		}
+		else{
+
 			for (unsigned i = 0; i < input->steps; i++){
 				log->LogVerbose("TBB: Starting iteration %d of %d\n", i, input->steps);
 
 				std::vector<bool> next(n*n);
-				//Parallelised next[]=
-				
-				// unsigned K;
-				// if (n%2 == 0)
-					 // K = n/2;
-				// else 
-					 // K = n;
-
-				// auto f = [&](const tbb::blocked_range2d<unsigned> &chunk) {
-				// 	for (unsigned x = chunk.rows().begin(); x < chunk.rows().end(); x++){
-				// 		for (unsigned y = chunk.cols().begin(); y < chunk.cols().end(); y++){
-				// 			next[y*n + x] = update_unroll(n, state, x, y);
-				// 		}
-				// 	}
-				// };
-				// tbb::parallel_for(tbb::blocked_range2d<unsigned>(0, n, n , 0, n, 100), f, tbb::simple_partitioner());
-				
 				unsigned K = 50;
-
-				for (unsigned x =0; x<n; x++){
-
+				//Parallelise inner loop:
+				for (unsigned x = 0; x<n; x++){
 					auto f = [&](const tbb::blocked_range<unsigned> &chunk) {
 						for (unsigned y = chunk.begin(); y < chunk.end(); y++){
 							next[y*n + x] = update_unroll(n, state, x, y);
 						}
 					};
-
 					tbb::parallel_for(tbb::blocked_range<unsigned>(0, n, K), f, tbb::simple_partitioner());
-
 				}
 				std::swap(state, next);
 				// The weird form of log is so that there is little overhead
