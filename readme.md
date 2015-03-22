@@ -50,9 +50,9 @@ The following timing graph shows the processing time after the above techniques 
 The part of the code that took the bulk of the execution time was the double for loops inside the implementation of `Execute()`. The operations were parallelised using `tbb:blocked_range2d` to parallelise the function across available CPU cores. Some tests were conducted to provide the best chunk range to use.
 
 #####Effect of our approach to improve performance
-![image](http://i.imgur.com/TASMYz5.png)
+![image](http://i.imgur.com/MSLAMHw.png)
 
-The graph above shows that the TBB code performs consistently better than the original sequential code. The speed up achieved is 36 times faster for `n`=3145728.
+The graph above shows that the TBB code performs consistently better than the original sequential code. The speed up achieved is 61 times faster for `n`=25165824.
 
 ###Option_explicit
 Similar to `median_bits`, the implementation of `execution()` had multiple for loops which could have been optimised.
