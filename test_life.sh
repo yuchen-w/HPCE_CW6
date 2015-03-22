@@ -1,5 +1,5 @@
 #!/bin/bash
-testvar="1 2 3 4 8 16 32 64 128"
+testvar="1 2 3 4 8 16 32 64 128 256 512 1024 2048 4096"
 rm life.log
 for i in $testvar; do
 	./bin/run_puzzle life $i 2 2>> life.log
