@@ -138,8 +138,15 @@ public:
 		
 		//Choosing TBB or OpenCL
 		int opencl_flag = 0;
-		if (getenv("HPCE_SELECT_OPENCL")){
+		/*if (getenv("HPCE_SELECT_OPENCL")){
 			opencl_flag = atoi(getenv("HPCE_SELECT_OPENCL"));
+		}*/
+
+		if (n < 512){
+			opencl_flag = 0;
+		}
+		else {
+			opencl_flag = 1;
 		}
 
 		if (opencl_flag == 1){
