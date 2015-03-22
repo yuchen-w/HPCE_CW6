@@ -41,18 +41,11 @@ class MatrixExponentProvider
 {
 
 private:
-	//TODO: Taking ages! 
 	static std::vector<uint32_t> MatrixMul_tbb(unsigned n, std::vector<uint32_t> a, std::vector<uint32_t> b)
 	{
 		std::vector<uint32_t> res(n*n, 0);
 
 		unsigned K = 10;
-
-		/*typedef tbb::blocked_range<unsigned> row_range_type;
-		typedef tbb::blocked_range<unsigned> col_range_type;
-
-		row_range_type range_r(0, n, K);
-		col_range_type range_r(0, n, K);*/
 
 		auto f = [&](const tbb::blocked_range2d<unsigned> &chunk) {
 			for (unsigned r = chunk.rows().begin(); r !=chunk.rows().end(); r++){
@@ -63,7 +56,7 @@ private:
 				}
 			}
 		};
-		tbb::parallel_for(tbb::blocked_range2d<unsigned>(0, n, K, 0, n, K), f , tbb::simple_partitioner() );
+		tbb::parallel_for(tbb::blocked_range2d<unsigned>(0, n, K, 0, n, K), f , tbb::simple_partitioner() ); //chunking over 2D blocked range
 
 		return res;
 	}

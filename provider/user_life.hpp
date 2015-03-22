@@ -9,35 +9,9 @@
 #include "tbb/parallel_for.h"
 #include "tbb/blocked_range2d.h"
 
-
 // To go at the top of the file - OpenCL
 #include <fstream>
 #include <streambuf>
-
-//OpenCL contents
-//std::string LoadSource(const char *fileName)
-//{
-//	// Don't forget to change your_login here
-//	std::string baseDir = "provider";
-//	if (getenv("HPCE_CL_SRC_DIR")){
-//		baseDir = getenv("HPCE_CL_SRC_DIR");
-//	}
-//
-//	std::string fullName = baseDir + "/" + fileName;
-//
-//	// Open a read-only binary stream over the file
-//	std::ifstream src(fullName, std::ios::in | std::ios::binary);
-//	if (!src.is_open())
-//		throw std::runtime_error("LoadSource : Couldn't load cl file from '" + fullName + "'.");
-//
-//	// Read all characters of the file into a string
-//	return std::string(
-//		(std::istreambuf_iterator<char>(src)), // Node the extra brackets.
-//		std::istreambuf_iterator<char>()
-//		);
-//}
-
-
 
 class LifeProvider
 	: public puzzler::LifePuzzle
@@ -114,16 +88,6 @@ private:
 			neighbours++;
 
 
-		//for (int dx = -1; dx <= +1; dx++){
-		//	for (int dy = -1; dy <= +1; dy++){
-		//		int ox = (n + x + dx) % n; // handle wrap-around
-		//		int oy = (n + y + dy) % n;
-
-		//		if (curr.at(oy*n + ox) && !(dx == 0 && dy == 0))
-		//			neighbours++;
-		//	}
-		//}
-
 		if (curr[n*y + x]){
 			// alive
 			if (neighbours<2){
@@ -171,13 +135,16 @@ public:
 				dst << "\n";
 			}
 		});
-		//Initialise OpenCL
+		
 		//Choosing TBB or OpenCL
 		int opencl_flag = 0;
 		if (getenv("HPCE_SELECT_OPENCL")){
 			opencl_flag = atoi(getenv("HPCE_SELECT_OPENCL"));
 		}
+
 		if (opencl_flag == 1){
+
+			//Initialise OpenCL
 			std::vector<cl::Platform> platforms;
 
 			cl::Platform::get(&platforms);
