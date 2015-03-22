@@ -49,7 +49,35 @@ Two of the `for` loops in the code had a variables vU and vD which depended on t
 vU = vU*u;
 vD = vD*d;
 ```
-With knowledge of the 
+With knowledge of the `for` loop's iteration, we can calculate the value of `vU` by using:
+```
+vU = input->S0*std::pow(u, (i));
+```
+With `std::pow()` a relatively computationally expensive function compared to multiply, the program can be sped up further with vU only calculated at the start of each TBB `tbb::parfor` chunk:
+
+```
+auto f2 = [&](const my_range_t &chunk2){	
+  double vU = input->S0*std::pow(u, (chunk2.begin()));	//This is expensive, do it outside of the i loop
+  double vD = input->S0*std::pow(d, (chunk2.begin()));
+  for (unsigned i = chunk2.begin(); i != chunk2.end(); i++){
+	  double vCU = wU*state[n + i + 1] + wM*state[n + i] + wD*state[n + i - 1];	
+	  double vCD = wU*state[n - i + 1] + wM*state[n - i] + wD*state[n - i - 1];
+	  vCU = (std::max)(vCU, vU - input->K);	//vU depends on the previous iteration's result for vU
+	  vCD = (std::max)(vCD, vD - input->K);
+	  tmp[n + i] = vCU;
+	  tmp[n - i] = vCD;
+	  vU = vU*u;
+	  vD = vD*d;
+  }
+};
+tbb::parallel_for(range2, f2, tbb::simple_partitioner());
+```
+
+At the end of the for loop, there is a copy of `tmp` into `state`. This was sped up by swapping the pointers of `tmp` and `state` with 
+```
+std::swap(state, tmp);	//state = tmp;
+```
+
 ###String_search
 It was deemed that it is difficult to speed up `string_search` because of the dependencies between the loops. The pseudo code of the operation is at follows:
 
