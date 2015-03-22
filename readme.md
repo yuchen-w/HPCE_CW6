@@ -29,6 +29,7 @@ For OpenCL, the implementation was a bit more tricky since `bool` variables cann
 Testing was done and above is the graph of the duration it took for different techniques. It shows that for `n`<512, it runs quickest on TBB and for above, and any higher `n` will call OpenCL.
 
 The updated code runs like this:
+
 ![image](http://i.imgur.com/0KwlENp.png)
 
 At `n`=1024, the performance speed up was around 128x, and at `n`=2048, it reaches around 196x speedup.
@@ -49,10 +50,12 @@ The following timing graph shows the processing time after the above techniques 
 ###Median_bits
 The part of the code that took the bulk of the execution time was the double for loops inside the implementation of `Execute()`. The operations were parallelised using `tbb:blocked_range2d` to parallelise the function across available CPU cores. Some tests were conducted to provide the best chunk range to use.
 
-#####Effect of our approach to improve performance
-![image](http://i.imgur.com/TASMYz5.png)
+The sorting to find the median is also parallelised up using `tbb::parallel_sort`, this has provided much of the speed up.
 
-The graph above shows that the TBB code performs consistently better than the original sequential code. The speed up achieved is 36 times faster for `n`=3145728.
+#####Effect of our approach to improve performance
+![image](http://i.imgur.com/MSLAMHw.png)
+
+The graph above shows that the TBB code performs consistently better than the original sequential code. The speed up achieved is 61 times faster for `n`=25165824.
 
 ###Option_explicit
 Similar to `median_bits`, the implementation of `execution()` had multiple for loops which could have been optimised.
