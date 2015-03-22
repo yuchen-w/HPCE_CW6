@@ -32,7 +32,7 @@ public:
 			my_range_t range(1, n + 1, K_tbb);
 			auto f = [&](const my_range_t &chunk)
 			{
-				double vU = input->S0*std::pow(u, (chunk.begin()));	//This is expensive, do it outside of the i loop
+				double vU = input->S0*std::pow(u, (chunk.begin()));
 				double vD = input->S0*std::pow(d, (chunk.begin()));
 				for (unsigned i = chunk.begin(); i != chunk.end(); i++)
 				{
@@ -58,7 +58,7 @@ public:
 		}
 		double wU = input->wU, wD = input->wD, wM = input->wM;
 
-		std::vector<double> tmp(state.size());	//std::vector<double> tmp = state;
+		std::vector<double> tmp(state.size());				//std::vector<double> tmp = state;
 
 
 		//*********parfor inner loop**************
@@ -66,14 +66,14 @@ public:
 		if (parfor_inner == true)
 		{
 			for (int t = 0; t < n; t++){
-				std::vector<double> tmp(state.size());	//std::vector<double> tmp = state;
+				std::vector<double> tmp(state.size());						//std::vector<double> tmp = state;
 				typedef tbb::blocked_range<unsigned> my_range_t;
 				my_range_t range2(0, n, K_tbb);
-				auto f2 = [&](const my_range_t &chunk2){	//look at moving this out of the loop
-					double vU = input->S0*std::pow(u, (chunk2.begin()));	//This is expensive, do it outside of the i loop
+				auto f2 = [&](const my_range_t &chunk2){	
+					double vU = input->S0*std::pow(u, (chunk2.begin()));	
 					double vD = input->S0*std::pow(d, (chunk2.begin()));
 					for (unsigned i = chunk2.begin(); i != chunk2.end(); i++){
-						//double vU = input->S0*std::pow(u, (i));	//This is expensive, do it outside of the i loop
+						//double vU = input->S0*std::pow(u, (i));			//This is expensive, do it outside of the i loop
 						//double vD = input->S0*std::pow(d, (i));
 						double vCU = wU*state[n + i + 1] + wM*state[n + i] + wD*state[n + i - 1];	//state depends on the previous iteration (of outer loop)'s result
 						double vCD = wU*state[n - i + 1] + wM*state[n - i] + wD*state[n - i - 1];
@@ -94,7 +94,7 @@ public:
 			//Test code:
 			for (int t = 0; t < n; t++){
 				for (int i = 0; i <= n / 2; i++){
-					vU = input->S0*std::pow(u, (i));	//Can raise this to the power
+					vU = input->S0*std::pow(u, (i));	
 					vD = input->S0*std::pow(d, (i));
 					double vCU = wU*state[n + i + 1] + wM*state[n + i] + wD*state[n + i - 1];	//state depends on the previous iteration (of outer loop)'s result
 					double vCD = wU*state[n - i + 1] + wM*state[n - i] + wD*state[n - i - 1];
@@ -104,8 +104,6 @@ public:
 					tmp[n - i] = vCD;
 				}
 				for (int i = (n / 2); i < n; i++){
-					/*  if (i = n-1)
-					int asdsad = 0;*/
 					vU = input->S0*std::pow(u, (i));	//Can raise this to the power
 					vD = input->S0*std::pow(d, (i));
 					double vCU = wU*state[n + i + 1] + wM*state[n + i] + wD*state[n + i - 1];	//state depends on the previous iteration (of outer loop)'s result

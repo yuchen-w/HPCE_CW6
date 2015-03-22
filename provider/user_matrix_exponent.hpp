@@ -16,7 +16,6 @@
 //OpenCL contents
 std::string LoadSource(const char *fileName)
 {
-	// Don't forget to change your_login here
 	std::string baseDir = "provider";
 	if (getenv("HPCE_CL_SRC_DIR")){
 		baseDir = getenv("HPCE_CL_SRC_DIR");
@@ -79,12 +78,6 @@ public:
 	  log->LogVerbose("Beginning multiplication");
 	  hash[0] = acc[0];
 
-	  //Choosing TBB or OpenCL
-	  /*int opencl_flag = 0;
-	  if (getenv("HPCE_SELECT_OPENCL")){
-		  opencl_flag = atoi(getenv("HPCE_SELECT_OPENCL"));
-	  }*/
-
 	  if (input->n < 32) {
 		  return ReferenceExecute(log, input, output);
 	  }
@@ -138,7 +131,7 @@ public:
 
 		  std::string kernelSource = LoadSource("user_matrix_exponent.cl");
 
-		  cl::Program::Sources sources;   // A vector of (data,length) pairs
+		  cl::Program::Sources sources;														// A vector of (data,length) pairs
 		  sources.push_back(std::make_pair(kernelSource.c_str(), kernelSource.size() + 1)); // push on our single string
 
 		  cl::Program program(context, sources);
@@ -166,9 +159,9 @@ public:
 		  queue.enqueueWriteBuffer(Abuf, CL_TRUE, 0, cbBuffer, &A[0]);
 		  
 
-		  cl::NDRange offset(0,0);               // Always start iterations at x=0, y=0
-		  cl::NDRange globalSize(input->n,input->n);   // Global size must match the original loops
-		  cl::NDRange localSize = cl::NullRange;    // We don't care about local size
+		  cl::NDRange offset(0,0);						// Always start iterations at x=0, y=0
+		  cl::NDRange globalSize(input->n,input->n);	// Global size must match the original loops
+		  cl::NDRange localSize = cl::NullRange;		// We don't care about local size
 	
 		  cl::Kernel kernel_MatrixMul(program, "MatrixMul");
 

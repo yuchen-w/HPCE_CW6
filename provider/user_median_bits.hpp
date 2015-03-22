@@ -2,7 +2,7 @@
 #define user_median_bits_hpp
 
 #include "puzzler/puzzles/median_bits.hpp"
-
+#include "tbb/parallel_sort.h"
 
 class MedianBitsProvider
   : public puzzler::MedianBitsPuzzle
@@ -16,7 +16,6 @@ public:
 		       const puzzler::MedianBitsInput *input,
 		       puzzler::MedianBitsOutput *output
 		       ) const override {
-   // ReferenceExecute(log, input, output);
 
 	log->LogInfo("Generating bits.");
 	double tic = puzzler::now();
@@ -55,7 +54,7 @@ public:
 					x = y; y = z; z = w;
 					w = w ^ (w >> 19) ^ t ^ (t >> 8);
 				}
-				temp[i] = w;
+				std::swap(temp[i], w);
 			}
 		};
 		tbb::parallel_for(tbb::blocked_range2d<unsigned>(0, input->n, tbb_K, 0, (unsigned)(std::log(16 + input->n) / std::log(1.1)), tbb_K), f, tbb::simple_partitioner());
@@ -63,7 +62,7 @@ public:
 	log->LogInfo("Finding median, delta=%lg", puzzler::now() - tic);
 	tic = puzzler::now();
 
-	std::sort(temp.begin(), temp.end());
+	tbb::parallel_sort(temp.begin(), temp.end());
 
 	output->median = temp[temp.size() / 2];
 

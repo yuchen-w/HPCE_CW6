@@ -119,7 +119,6 @@ public:
 		const puzzler::LifeInput *input,
 		puzzler::LifeOutput *output
 		) const override {
-		/*ReferenceExecute(log, input, output);*/
 
 		log->LogVerbose("About to start running iterations (total = %d)", input->steps);
 
@@ -138,9 +137,6 @@ public:
 		
 		//Choosing TBB or OpenCL
 		int opencl_flag = 0;
-		/*if (getenv("HPCE_SELECT_OPENCL")){
-			opencl_flag = atoi(getenv("HPCE_SELECT_OPENCL"));
-		}*/
 
 		if (n < 512){
 			opencl_flag = 0;
@@ -255,7 +251,6 @@ public:
 			if (opencl_flag == 1) {
 				queue.enqueueReadBuffer(currbuf, CL_TRUE, 0, cbBuffer, &state_int[0]);
 
-
 				for (unsigned i = 0; i < n*n; i++){
 					state[i] = (bool)state_int[i];
 				}
@@ -278,10 +273,8 @@ public:
 						}
 					}
 				};
-				tbb::parallel_for(tbb::blocked_range2d<unsigned>(0, n, K, 0, n, K), f, tbb::simple_partitioner());
-				state = next;
-
-
+				tbb::parallel_for(tbb::blocked_range2d<unsigned>(0, n, n, 0, n, K), f, tbb::simple_partitioner());
+				std::swap(state, next);
 
 				// The weird form of log is so that there is little overhead
 				// if logging is disabled
