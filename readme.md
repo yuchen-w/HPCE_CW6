@@ -40,8 +40,9 @@ Testing was done and here's the graph
 The part of the code that took the bulk of the execution time was the double for loops inside the implementation of `Execute()`. The operations were parallelised using `tbb:blocked_range2d` to parallelise the function across available CPU cores. Some tests were conducted to provide the best chunk range to use.
 
 #####Effect of our approach to improve performance
-Testing was done and here's the graph
 ![image](http://i.imgur.com/TASMYz5.png)
+
+The graph above shows that the TBB code performs consistently better than the original sequential code. The speed up achieved is 36 times faster for `n`=3145728.
 
 ###Option_explicit
 Similar to `median_bits`, the implementation of `execution()` had multiple for loops which could have been optimised.
@@ -80,6 +81,8 @@ std::swap(state, tmp);	//state = tmp;
 ```
 #####Effect of our approach to improve performance
 Testing was done and here's the graph
+
+
 ###String_search
 It was deemed too difficult to speed up `string_search` because of the dependencies between the loops. The pseudo code of the operation is as follows:
 
@@ -142,7 +145,8 @@ With the help of Visual Studio's profiler, we found that the function `next` was
 
 Some issues were encountered using `tbb::parfor` because of the type of data that was used (`vector<bool>`). This was remedied by converting the data while it was being operated on into `vector<char>` and creating overloaded functions which would operate on this type of data. `vector<char>` was selected as it was the next smallest array for storing data after `vector<bool>`
 #####Effect of our approach to improve performance
-Testing was done and here's the graph
+![image](http://i.imgur.com/SHxM1du.png)
+The graph above shows that the TBB code performs consistently better than the original sequential code. The speed up achieved is around 5x for values of `n` above 4096.
 
 Testing Methodology
 -------------------
