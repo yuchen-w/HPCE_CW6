@@ -37,14 +37,19 @@ Testing is done and here's the graph
 
 
 ###Median_bits
-The part of the code that took the bulk of the execution time was the double for loops. The operations were parallelised using `tbb:blocked_range2d` to parallelise the function across available CPU cores. Some tests were conducted to provide the best chunk range to use.
+The part of the code that took the bulk of the execution time was the double for loops inside the implementation of `Execute()`. The operations were parallelised using `tbb:blocked_range2d` to parallelise the function across available CPU cores. Some tests were conducted to provide the best chunk range to use.
 
 #####Approach to improve performance
 Testing is done and here's the graph
 
 ###Option_explicit
-option_explicit
-
+Similar to `median_bits`, the implementation of `execution()` had multiple for loops which could have been optimised.
+Two of the `for` loops in the code had a variables vU and vD which depended on the value calculated on the previous iteration:
+```
+vU = vU*u;
+vD = vD*d;
+```
+With knowledge of the 
 ###String_search
 It was deemed that it is difficult to speed up `string_search` because of the dependencies between the loops. The pseudo code of the operation is at follows:
 
