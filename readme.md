@@ -33,7 +33,9 @@ The function that took most time was `MatrixMul()` since it contains 3 loops, ea
 For TBB, a new function `MatrixMul_tbb()` was created and once again, the library `tbb::parallel_for` with a `tbb::blocked_range2d` was used. For OpenCL, a kernel `MatrixMul` was created to perform the same function. 
 
 #####Effect of our approach to improve performance
-Testing was done and here's the graph
+![image](http://i.imgur.com/oQ7TMCh.png)
+
+Note that there is the result for the orignal code at `n` = 32 is not shown since the duration was given as 0s from testing. The graph shows that for `n`<32, the puzzle should run the original script (i.e. `ReferenceExecute`); for `n` between 32 and 64, the TBB code should be run and above that, the OpenCL code should be called.
 
 
 ###Median_bits
@@ -80,8 +82,9 @@ At the end of the for loop, there was a copy of `tmp` into `state`. This was spe
 std::swap(state, tmp);	//state = tmp;
 ```
 #####Effect of our approach to improve performance
-Testing was done and here's the graph
+![image](http://i.imgur.com/PRyWZZB.png)
 
+The graph above shows that the TBB code performs consistently better than the original sequential code. The speed up achieved is up to 2.9x for `n` = 131072.
 
 ###String_search
 It was deemed too difficult to speed up `string_search` because of the dependencies between the loops. The pseudo code of the operation is as follows:
@@ -146,6 +149,8 @@ With the help of Visual Studio's profiler, we found that the function `next` was
 Some issues were encountered using `tbb::parfor` because of the type of data that was used (`vector<bool>`). This was remedied by converting the data while it was being operated on into `vector<char>` and creating overloaded functions which would operate on this type of data. `vector<char>` was selected as it was the next smallest array for storing data after `vector<bool>`
 #####Effect of our approach to improve performance
 ![image](http://i.imgur.com/SHxM1du.png)
+
+
 The graph above shows that the TBB code performs consistently better than the original sequential code. The speed up achieved is around 5x for values of `n` above 4096.
 
 Testing Methodology
