@@ -33,7 +33,9 @@ The function that took most time was `MatrixMul()` since it contains 3 loops, ea
 For TBB, a new function `MatrixMul_tbb()` was created and once again, the library `tbb::parallel_for` with a `tbb::blocked_range2d` was used. For OpenCL, a kernel `MatrixMul` was created to perform the same function. 
 
 #####Effect of our approach to improve performance
-Testing was done and here's the graph
+![image](http://i.imgur.com/oQ7TMCh.png)
+
+Note that there is the result for the orignal code at `n` = 32 is not shown since the duration was given as 0s from testing. The graph shows that for `n`<32, the puzzle should run the original script (i.e. `ReferenceExecute`); for `n` between 32 and 64, the TBB code should be run and above that, the OpenCL code should be called.
 
 
 ###Median_bits
