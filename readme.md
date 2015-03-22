@@ -47,6 +47,11 @@ option_explicit
 ###String_search
 string_search
 
+###Circuit_sim
+With the help of Visual Studio's profiler, we can see that the function `next` was taking up the most execution time. Both `tbb::task_group` and `tbb::parfor` were trialed to optimise the operation of the program.
+
+However, it was found that `tbb::task_group` actually significantly slowed down the operation of the program, so this was not utilised in the code. Some issues were encountered using `tbb::parfor` because of the type of data that was used (`vector<bool>`). This was remedied by converting the data while it was being operated on into `vector<char>` and creating overloaded functions which would operate on this type of data. `vector<char>` was selected as it was the next smallest array for storing data after `vector<bool>`
+
 Testing Methodology
 -------------------
 
