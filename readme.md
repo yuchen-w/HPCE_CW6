@@ -99,9 +99,13 @@ end
 Athough the potential speedup of the matching can be significant, the resultant sorting can only be done sequentially and this involves two `for` loops. Since the original code actually computes relatively fast anyway, it was deemed that the new algorithm might actually lengthen the computation so this was not attempted any further.
 
 ###Circuit_sim
-With the help of Visual Studio's profiler, we can see that the function `next` was taking up the most execution time. Both `tbb::task_group` and `tbb::parfor` were trialed to optimise the operation of the program.
+With the help of Visual Studio's profiler, we found that the function `next` was taking up the most execution time. To optimise `next` we created function `next_tbb` to optimise the implementation of the function. Both `tbb::task_group` and `tbb::parfor` were trialed to optimise the operation of the program. 
 
-However, it was found that `tbb::task_group` actually significantly slowed down the operation of the program, so this was not utilised in the code. Some issues were encountered using `tbb::parfor` because of the type of data that was used (`vector<bool>`). This was remedied by converting the data while it was being operated on into `vector<char>` and creating overloaded functions which would operate on this type of data. `vector<char>` was selected as it was the next smallest array for storing data after `vector<bool>`
+`tbb::task_group` was attempted to be used in the `calcSrc` function which is called in a `for` loop inside the function `next`. However, it was found that `tbb::task_group` actually significantly slowed down the operation of the program, so this was not utilised in the code. 
+
+`tbb::parfor` was utilised to parallelise the for loop in `next`. This was found to have sped up the performance of the program on AWS.
+
+Some issues were encountered using `tbb::parfor` because of the type of data that was used (`vector<bool>`). This was remedied by converting the data while it was being operated on into `vector<char>` and creating overloaded functions which would operate on this type of data. `vector<char>` was selected as it was the next smallest array for storing data after `vector<bool>`
 
 Testing Methodology
 -------------------
