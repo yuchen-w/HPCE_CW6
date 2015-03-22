@@ -280,11 +280,11 @@ public:
 				std::vector<bool> next(n*n);
 				//Parallelised next[]=
 				
-				unsigned K;
-				if (n%2 == 0)
-					 K = n/2;
-				else 
-					 K = n;
+				// unsigned K;
+				// if (n%2 == 0)
+					 // K = n/2;
+				// else 
+					 // K = n;
 
 				// auto f = [&](const tbb::blocked_range2d<unsigned> &chunk) {
 				// 	for (unsigned x = chunk.rows().begin(); x < chunk.rows().end(); x++){
@@ -295,7 +295,7 @@ public:
 				// };
 				// tbb::parallel_for(tbb::blocked_range2d<unsigned>(0, n, n , 0, n, 100), f, tbb::simple_partitioner());
 				
-				
+				unsigned K = 50;
 
 				for (unsigned x =0; x<n; x++){
 
