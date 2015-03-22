@@ -1,13 +1,11 @@
 HPCE 2014 CW6
 =============
-Approach to improve performance
+The General approach
 -------------------------------
 Code was ran with the Visual Studio's Performance Profiler over a few minutes to identify key functions which were taking the most exectuion time:
 ![image](https://cloud.githubusercontent.com/assets/3355737/6650373/a8bd3e5e-ca06-11e4-9048-fa2f345940ef.png)
 
-TBB was used to optimise these functions in the first instance.
-
-Some functions that looked like they could be improved with OpenCL were implemented in OpenCL.
+TBB was used to optimise these functions in the first instance, whilst if it seems that OpenCL can improve performance further, it is also implmented.
 
 ###Life
 Within the `update` function, the 2 `for` loops for `dx` and `dy` only operates the function 9 times. By manually expand the operation to eliminate the need of this `for` loop, performance is increased.
