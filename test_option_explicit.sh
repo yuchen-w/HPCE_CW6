@@ -1,5 +1,5 @@
 #!/bin/bash
-testvar="1 2 3 4 8 16 32 64 128 1024 4096 16000"
+testvar="1 2 3 4 8 16 32 64 128 1024 4096 16000 32000 64000 131072"
 rm option_explicit.log
 for i in $testvar; do
 	./bin/run_puzzle option_explicit $i 2 2>> option_explicit.log
