@@ -117,9 +117,10 @@ public:
 			}
 		}
 
-		std::swap(output->steps, n);
-		std::swap(output->value, state[n]);
-
+		//std::swap(output->steps, n);
+		output->steps = n;
+		//std::swap(output->value, state[n]);
+		output->value = state[n];
 		log->LogVerbose("TBB: Priced n=%d, S0=%lg, K=%lg, r=%lg, sigma=%lg, BU=%lg : value=%lg", n, input->S0, input->K, input->r, input->sigma, input->BU, output->value);
 
 
